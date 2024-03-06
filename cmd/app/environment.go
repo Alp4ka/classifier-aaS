@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"github.com/Alp4ka/classifier-aaS/internal/app"
-	"github.com/Alp4ka/classifier-aaS/internal/config"
 	dbpkg "github.com/Alp4ka/classifier-aaS/pkg/db"
 	"github.com/Alp4ka/mlogger"
 	"github.com/Alp4ka/mlogger/field"
@@ -17,7 +16,7 @@ const AppName = "payment"
 type environment struct {
 	ctx context.Context
 
-	cfg *config.Config
+	cfg *app.Config
 	db  *sqlx.DB
 
 	app *app.App
@@ -53,7 +52,7 @@ func setupLogging(env *environment) {
 }
 
 func setupConfig(env *environment) {
-	cfg, err := config.FromEnv()
+	cfg, err := app.FromEnv()
 	if err != nil {
 		mlogger.L().Fatal("failed to load config", field.Error(err))
 	}

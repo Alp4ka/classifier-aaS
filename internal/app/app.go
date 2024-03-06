@@ -3,10 +3,13 @@ package app
 import "context"
 
 type App struct {
+	cfg *Config
 }
 
-func New() *App {
-	return &App{}
+func New(cfg *Config) *App {
+	return &App{
+		cfg: cfg,
+	}
 }
 
 func (a *App) Run(ctx context.Context) error {
