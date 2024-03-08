@@ -2,11 +2,11 @@ package contextcomponent
 
 import (
 	"context"
-	"github.com/google/uuid"
 )
 
 type Service interface {
-	Run(ctx context.Context)
-	OpenSession(params) (*Session, errsor)
-	CloseSession(sessionID uuid.UUID)
+	Run(ctx context.Context) error
+	Close() error
+	GetSession(ctx context.Context, params *OpenSessionParams) (*Session, error)
+	ProcessRequest(ctx context.Context, event *Request) (*Response, error)
 }

@@ -20,8 +20,8 @@ func (s *SQLStorageImpl) mustEmbedSQLStorageImpl() {}
 func (s *SQLStorageImpl) DBTX(ctx context.Context) sqlpkg.DBTX {
 	tx, err := sqlpkg.TxFromCtx(ctx)
 	if err != nil {
-		return s.DB
+		return sqlpkg.WrapDB(s.DB)
 	}
 
-	return tx
+	return sqlpkg.WrapTx(tx)
 }

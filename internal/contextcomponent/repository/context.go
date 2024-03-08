@@ -10,6 +10,7 @@ import (
 
 type Context struct {
 	ID              uuid.UUID    `db:"id" goqu:"skipinsert,skipupdate"`
+	SessionID       uuid.UUID    `db:"session_id"`
 	SchemaVariantID uuid.UUID    `db:"schema_variant_id"`
 	SchemaStepXPath string       `db:"schema_x_path"`
 	State           ContextState `db:"state"`

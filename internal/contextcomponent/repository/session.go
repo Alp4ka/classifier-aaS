@@ -4,16 +4,23 @@ import (
 	"database/sql/driver"
 	"errors"
 	"fmt"
+	"github.com/doug-martin/goqu/v9"
 	"github.com/google/uuid"
 	"time"
 )
 
+var (
+	tbl_Session = goqu.T("session")
+
+	col_Session_ID = tbl_Session.Col("id")
+)
+
 type Session struct {
-	ID        uuid.UUID    `db:"id" goqu:"skipinsert,skipupdate"`
-	ContextID uuid.UUID    `db:"context_id"`
-	CreatedAt time.Time    `db:"created_at" goqu:"skipupdate"`
-	UpdatedAt time.Time    `db:"updated_at"`
-	State     SessionState `db:"state"`
+	ID         uuid.UUID    `db:"id" goqu:"skipinsert,skipupdate"`
+	CreatedAt  time.Time    `db:"created_at" goqu:"skipupdate"`
+	ValidUntil time.Time    `db:"valid_until" goqu:"skipupdate"`
+	UpdatedAt  time.Time    `db:"updated_at"`
+	State      SessionState `db:"state"`
 }
 
 type SessionState string

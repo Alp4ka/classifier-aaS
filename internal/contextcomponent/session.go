@@ -11,6 +11,10 @@ type Session struct {
 	closeFn closeFnType
 }
 
+func NewSession(id uuid.UUID, closeFn closeFnType) *Session {
+	return &Session{ID: id, closeFn: closeFn}
+}
+
 func (s *Session) Close() error {
 	return s.closeFn()
 }
