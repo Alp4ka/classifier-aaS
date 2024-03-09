@@ -1,22 +1,23 @@
 package contextcomponent
 
 import (
-	"github.com/google/uuid"
+	"context"
+	"github.com/Alp4ka/classifier-aaS/internal/contextcomponent/repository"
 )
 
-type closeFnType = func() error
+type closeFnType = func(ctx context.Context) error
 
 type Session struct {
-	ID      uuid.UUID
+	Model   *repository.Session
 	closeFn closeFnType
 }
 
-func NewSession(id uuid.UUID, closeFn closeFnType) *Session {
-	return &Session{ID: id, closeFn: closeFn}
+func NewSession(model *repository.Session, closeFn closeFnType) *Session {
+	return &Session{Model: model, closeFn: closeFn}
 }
 
-func (s *Session) Close() error {
-	return s.closeFn()
+func (s *Session) Close(ctx context.Context) error {
+	return s.closeFn(ctx)
 }
 
 var _ closeFnType = (*Session)(nil).Close

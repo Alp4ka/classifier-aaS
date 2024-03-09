@@ -12,15 +12,19 @@ import (
 var (
 	tbl_Session = goqu.T("session")
 
-	col_Session_ID = tbl_Session.Col("id")
+	col_Session_ID         = tbl_Session.Col("id")
+	col_Session_ValidUntil = tbl_Session.Col("valid_until")
+	col_Session_State      = tbl_Session.Col("state")
 )
 
 type Session struct {
-	ID         uuid.UUID    `db:"id" goqu:"skipinsert,skipupdate"`
-	CreatedAt  time.Time    `db:"created_at" goqu:"skipupdate"`
-	ValidUntil time.Time    `db:"valid_until" goqu:"skipupdate"`
-	UpdatedAt  time.Time    `db:"updated_at"`
-	State      SessionState `db:"state"`
+	ID         uuid.UUID    `json:"id" db:"id" goqu:"skipupdate"`
+	State      SessionState `json:"state" db:"state"`
+	Agent      string       `json:"agent" db:"agent" goqu:"skipupdate"`
+	Gateway    string       `json:"gateway" db:"gateway" goqu:"skipupdate"`
+	ValidUntil time.Time    `json:"validUntil" db:"valid_until" goqu:"skipupdate"` // TODO(Gorkovets Roman): logic for invalidation invalid.
+	CreatedAt  time.Time    `json:"createdAt" db:"created_at" goqu:"skipupdate"`
+	UpdatedAt  time.Time    `json:"updatedAt" db:"updated_at"`
 }
 
 type SessionState string
@@ -46,13 +50,15 @@ func (cs *SessionState) Scan(value interface{}) error {
 }
 
 const (
-	SessionStateActive SessionState = "active"
-	SessionStateClosed SessionState = "closed"
-	SessionStateError  SessionState = "error"
+	SessionStateActive       SessionState = "active"
+	SessionStateClosedAgent  SessionState = "closed_by_agent"
+	SessionStateClosedRotten SessionState = "closed_by_rot"
+	SessionStateError        SessionState = "error"
 )
 
 var _availableSessionStates = map[SessionState]struct{}{
-	SessionStateActive: {},
-	SessionStateClosed: {},
-	SessionStateError:  {},
+	SessionStateActive:       {},
+	SessionStateClosedAgent:  {},
+	SessionStateClosedRotten: {},
+	SessionStateError:        {},
 }

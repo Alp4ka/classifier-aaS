@@ -3,11 +3,10 @@ package sql
 import (
 	"context"
 	"database/sql"
-
 	"github.com/jmoiron/sqlx"
 )
 
-type dbtxer interface {
+type DBTx interface {
 	QueryxContext(ctx context.Context, query string, args ...interface{}) (*sqlx.Rows, error)
 	QueryRowxContext(ctx context.Context, query string, args ...interface{}) *sqlx.Row
 	SelectContext(ctx context.Context, dest interface{}, query string, args ...interface{}) error
@@ -20,36 +19,14 @@ type dbtxer interface {
 	Exec(query string, args ...interface{}) (sql.Result, error)
 }
 
-type helper interface {
-	mustEmbedDbtxWrapper()
-	IsTx() bool
-}
-
-type DBTX interface {
-	dbtxer
-	helper
-}
-
-type dbtxWrapper struct {
-	dbtxer
-	isTx bool
-}
-
-func (d *dbtxWrapper) IsTx() bool {
-	return d.isTx
-}
-
-func (d *dbtxWrapper) mustEmbedDbtxWrapper() {}
-
-func WrapDB(db *sqlx.DB) DBTX {
-	return &dbtxWrapper{dbtxer: db, isTx: false}
-}
-
-func WrapTx(tx *sqlx.Tx) DBTX {
-	return &dbtxWrapper{dbtxer: tx, isTx: true}
+type Tx interface {
+	DBTx
+	Commit() error
+	Rollback() error
 }
 
 var (
-	_ dbtxer = (*sqlx.DB)(nil)
-	_ dbtxer = (*sqlx.Tx)(nil)
+	_ DBTx = (*sqlx.DB)(nil)
+	_ DBTx = (*sqlx.Tx)(nil)
+	_ Tx   = (*sqlx.Tx)(nil)
 )

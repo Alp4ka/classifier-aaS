@@ -7,16 +7,34 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+type SessionRepository interface {
+	GetSession(ctx context.Context, dbtx sqlpkg.DBTx, filter *GetSessionFilter) (*Session, error)
+	CreateSession(ctx context.Context, dbtx sqlpkg.DBTx, session *Session) error
+	UpdateSession(ctx context.Context, dbtx sqlpkg.Tx, session *Session) error
+}
+
+type ContextRepository interface {
+	GetContext(ctx context.Context, dbtx sqlpkg.DBTx, filter *GetContextFilter) (*Context, error)
+	CreateContext(ctx context.Context, dbtx sqlpkg.DBTx, context Context) error
+	UpdateContext(ctx context.Context, dbtx sqlpkg.Tx, context Context) error
+}
+
+type EventRepository interface {
+	CreateEvent(ctx context.Context, dbtx sqlpkg.DBTx, event Event) error
+}
+
 type Repository interface {
 	storage.SQLStorage
-	GetSession(ctx context.Context, dbtx sqlpkg.DBTX, filter *GetSessionFilter) (*Session, error)
-	CreateSession(ctx context.Context, dbtx sqlpkg.DBTX, session Session) error
+
+	SessionRepository
+	ContextRepository
+	EventRepository
 }
 
 func NewRepository(db *sqlx.DB) Repository {
 	return &repositoryImpl{
 		SQLStorageImpl: &storage.SQLStorageImpl{
-			DB: db,
+			Db: db,
 		},
 	}
 }

@@ -5,8 +5,6 @@ import (
 )
 
 type Service interface {
-	Run(ctx context.Context) error
-	Close() error
-	GetSession(ctx context.Context, params *OpenSessionParams) (*Session, error)
-	ProcessRequest(ctx context.Context, event *Request) (*Response, error)
+	AcquireSession(ctx context.Context, params *AcquireSessionParams) (*Session, error)
+	Handle(ctx context.Context, session *Session, req *Request) (*Response, error)
 }

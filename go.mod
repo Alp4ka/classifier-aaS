@@ -5,6 +5,7 @@ go 1.21.1
 require (
 	github.com/Alp4ka/mlogger v1.0.14
 	github.com/caarlos0/env v3.5.0+incompatible
+	github.com/doug-martin/goqu/v9 v9.19.0
 	github.com/google/uuid v1.6.0
 	github.com/j2gg0s/otsql v0.18.0
 	github.com/jackc/pgx/v5 v5.5.4
@@ -14,7 +15,6 @@ require (
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
-	github.com/doug-martin/goqu/v9 v9.19.0 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect

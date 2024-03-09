@@ -81,5 +81,5 @@ func setupDatabase(env *environment) {
 
 func setupApp(env *environment) {
 	// Env setup.
-	env.app = app.New()
+	env.app = app.New(env.cfg)
 }
