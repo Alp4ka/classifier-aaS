@@ -22,7 +22,7 @@ type Session struct {
 	State      SessionState `json:"state" db:"state"`
 	Agent      string       `json:"agent" db:"agent" goqu:"skipupdate"`
 	Gateway    string       `json:"gateway" db:"gateway" goqu:"skipupdate"`
-	ValidUntil time.Time    `json:"validUntil" db:"valid_until" goqu:"skipupdate"` // TODO(Gorkovets Roman): logic for invalidation invalid.
+	ValidUntil time.Time    `json:"validUntil" db:"valid_until" goqu:"skipupdate"` // TODO(Gorkovets Roman): logic for deletion invalid.
 	CreatedAt  time.Time    `json:"createdAt" db:"created_at" goqu:"skipupdate"`
 	UpdatedAt  time.Time    `json:"updatedAt" db:"updated_at"`
 }
