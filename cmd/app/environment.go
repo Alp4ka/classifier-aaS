@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"github.com/Alp4ka/classifier-aaS/internal/app"
+	"github.com/Alp4ka/classifier-aaS/internal/config"
 	dbpkg "github.com/Alp4ka/classifier-aaS/pkg/db"
 	"github.com/Alp4ka/mlogger"
 	"github.com/Alp4ka/mlogger/field"
@@ -14,9 +15,10 @@ import (
 const AppName = "payment"
 
 type environment struct {
-	ctx context.Context
+	ctx        context.Context
+	cancelFunc context.CancelFunc
 
-	cfg *app.Config
+	cfg *config.Config
 	db  *sqlx.DB
 
 	app *app.App
@@ -34,7 +36,7 @@ func setup() *environment {
 
 func setupContext(env *environment) {
 	// Env setup.
-	env.ctx = context.Background()
+	env.ctx, env.cancelFunc = context.WithCancel(context.Background())
 }
 
 func setupLogging(env *environment) {
@@ -52,7 +54,7 @@ func setupLogging(env *environment) {
 }
 
 func setupConfig(env *environment) {
-	cfg, err := app.FromEnv()
+	cfg, err := config.FromEnv()
 	if err != nil {
 		mlogger.L().Fatal("failed to load config", field.Error(err))
 	}
@@ -81,5 +83,12 @@ func setupDatabase(env *environment) {
 
 func setupApp(env *environment) {
 	// Env setup.
-	env.app = app.New(env.cfg)
+	env.app = app.New(
+		app.Config{
+			DB:            env.db,
+			OpenAIAPIKey:  env.cfg.OpenAIAPIKey,
+			HTTPPort:      env.cfg.HTTPPort,
+			HTTPRateLimit: env.cfg.RateLimit,
+		},
+	)
 }

@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-const MaxNodesCount = 100
+const MaxNodesCount = 10
 
 type Description struct {
 	nodes []*BaseNode
@@ -29,6 +29,7 @@ func (d *Description) MapAndValidate() (map[NodeID]Node, error) {
 	}
 
 	// TODO: hasFinishPath  bool. If it has any path.
+	// TODO: hasCycles?
 
 	// Build mapping.
 	var (
@@ -40,32 +41,28 @@ func (d *Description) MapAndValidate() (map[NodeID]Node, error) {
 		if node == nil {
 			return nil, fmt.Errorf("node is nil")
 		}
-		if node.Type == NodeTypeStart {
-			cntStartNodes++
-			if cntStartNodes > 1 {
-				return nil, fmt.Errorf("too many start nodes")
-			}
-		}
-		if node.Type == NodeTypeFinish {
-			cntFinishNodes++
-			if cntFinishNodes > 1 {
-				return nil, fmt.Errorf("too many finish nodes")
-			}
-		}
 		if _, ok := mapping[node.ID]; ok {
 			return nil, fmt.Errorf("duplicate node ID %s", node.ID)
 		}
 		mapping[node.ID] = node
 	}
-	if cntStartNodes != 1 {
-		return nil, fmt.Errorf("no start node")
-	}
-	if cntFinishNodes != 1 {
-		return nil, fmt.Errorf("no finish node")
-	}
 
 	// Check for fake paths.
 	for k, _ := range mapping {
+		// Check if there are to many start/finish nodes.
+		if mapping[k].GetType() == NodeTypeStart {
+			cntStartNodes++
+			if cntStartNodes > 1 {
+				return nil, fmt.Errorf("too many start nodes")
+			}
+		}
+		if mapping[k].GetType() == NodeTypeFinish {
+			cntFinishNodes++
+			if cntFinishNodes > 1 {
+				return nil, fmt.Errorf("too many finish nodes")
+			}
+		}
+
 		if mapping[k].GetNextErrorID().Valid {
 			if mapping[k].GetNextErrorID().UUID == mapping[k].GetID() {
 				return nil, fmt.Errorf("node %s has itself as next error node", mapping[k].GetID())
@@ -84,17 +81,26 @@ func (d *Description) MapAndValidate() (map[NodeID]Node, error) {
 			}
 		}
 
+		// Fit node.
 		tmpNode, err := FromNode(mapping[k])
 		if err != nil {
 			return nil, fmt.Errorf("node %s %w", mapping[k].GetID(), err)
 		}
 
+		// Validate.
 		err = tmpNode.Validate()
 		if err != nil {
 			return nil, fmt.Errorf("node %s failed to validate %w", mapping[k].GetID(), err)
 		}
 
 		mapping[k] = tmpNode
+	}
+	// Also a problem if there are to many start/finish nodes.
+	if cntStartNodes != 1 {
+		return nil, fmt.Errorf("no start node")
+	}
+	if cntFinishNodes != 1 {
+		return nil, fmt.Errorf("no finish node")
 	}
 
 	return mapping, nil

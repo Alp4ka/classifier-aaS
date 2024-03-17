@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS schema
 (
     id                UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     gateway           TEXT                        NOT NULL,
-    actual_variant_id UUID                        NOT NULL REFERENCES schema_variant (id),
+    actual_variant_id UUID                        NOT NULL,
     created_at        TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     updated_at        TIMESTAMP WITHOUT TIME ZONE NOT NULL
 );

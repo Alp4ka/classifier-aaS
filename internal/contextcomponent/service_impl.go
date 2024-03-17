@@ -16,7 +16,8 @@ import (
 const DefaultSessionLifetime time.Duration = time.Hour
 
 type Config struct {
-	repo repository.Repository
+	Repository   repository.Repository
+	OpenAIAPIKey string
 }
 
 type serviceImpl struct {
@@ -27,7 +28,7 @@ type serviceImpl struct {
 
 func NewService(cfg Config) Service {
 	return &serviceImpl{
-		repo: cfg.repo,
+		repo: cfg.Repository,
 	}
 }
 
