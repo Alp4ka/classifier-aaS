@@ -23,6 +23,7 @@ type Session struct {
 	Agent      string       `json:"agent" db:"agent" goqu:"skipupdate"`
 	Gateway    string       `json:"gateway" db:"gateway" goqu:"skipupdate"`
 	ValidUntil time.Time    `json:"validUntil" db:"valid_until" goqu:"skipupdate"` // TODO(Gorkovets Roman): logic for deletion invalid.
+	ClosedAt   time.Time    `json:"closedAt" db:"closed_at"`
 	CreatedAt  time.Time    `json:"createdAt" db:"created_at" goqu:"skipupdate"`
 	UpdatedAt  time.Time    `json:"updatedAt" db:"updated_at"`
 }

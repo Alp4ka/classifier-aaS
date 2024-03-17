@@ -47,7 +47,7 @@ func (r *repositoryImpl) GetSession(ctx context.Context, dbtx sqlpkg.DBTx, filte
 	err = dbtx.GetContext(ctx, &session, query)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errors.Join(storage.ErrEntityNotFound, sql.ErrNoRows)
+			return nil, errors.Join(storage.ErrEntityNotFound, err)
 		}
 		return nil, fmt.Errorf("%s: %w", fn, err)
 	}

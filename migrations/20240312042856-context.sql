@@ -1,7 +1,7 @@
 -- +migrate Up
 CREATE TABLE IF NOT EXISTS context
 (
-    id                UUID PRIMARY KEY,
+    id                UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     session_id        UUID                        NOT NULL REFERENCES session (id),
     -- Since we are going to migrate to microservice architecture, we don't really need to specify FK here.
     schema_variant_id UUID                        NOT NULL,

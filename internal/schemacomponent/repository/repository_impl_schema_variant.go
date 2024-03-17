@@ -12,31 +12,37 @@ import (
 	"github.com/google/uuid"
 )
 
-type GetContextFilter struct {
-	SessionID uuid.UUID
+type GetSchemaVariantFilter struct {
+	ID       uuid.NullUUID
+	SchemaID uuid.NullUUID
 }
 
-func (f *GetContextFilter) toDataset() *goqu.SelectDataset {
-	query := goqu.Select(tbl_Context)
+func (f *GetSchemaVariantFilter) toDataset() *goqu.SelectDataset {
+	query := goqu.Select(tbl_SchemaVariant)
 
 	if f == nil {
-		query = query.Where(sqlpkg.UnrealCondition)
-	} else {
-		query = query.Where(col_Context_SessionID.Eq(f.SessionID))
+		return query.Where(sqlpkg.UnrealCondition)
+	}
+
+	if f.ID.Valid {
+		query = query.Where(col_SchemaVariant_ID.Eq(f.ID.UUID))
+	}
+	if f.SchemaID.Valid {
+		query = query.Where(col_SchemaVariant_SchemaID.Eq(f.SchemaID.UUID))
 	}
 
 	return query
 }
 
-func (r *repositoryImpl) GetContext(ctx context.Context, dbtx sqlpkg.DBTx, filter *GetContextFilter) (*Context, error) {
-	const fn = "repositoryImpl.GetContext"
+func (r *repositoryImpl) GetSchemaVariant(ctx context.Context, dbtx sqlpkg.DBTx, filter *GetSchemaVariantFilter) (*SchemaVariant, error) {
+	const fn = "repositoryImpl.GetSchemaVariant"
 
 	query, _, err := filter.toDataset().ToSQL()
 	if err != nil {
 		panic(err)
 	}
 
-	var ret Context
+	var ret SchemaVariant
 	err = dbtx.GetContext(ctx, &ret, query)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -48,14 +54,14 @@ func (r *repositoryImpl) GetContext(ctx context.Context, dbtx sqlpkg.DBTx, filte
 	return &ret, nil
 }
 
-func (r *repositoryImpl) CreateContext(ctx context.Context, dbtx sqlpkg.DBTx, context Context) error {
-	const fn = "repositoryImpl.CreateContext"
+func (r *repositoryImpl) CreateSchemaVariant(ctx context.Context, dbtx sqlpkg.DBTx, record SchemaVariant) error {
+	const fn = "repositoryImpl.CreateSchemaVariant"
 
 	timeNow := timepkg.TimeNow()
-	context.CreatedAt = timeNow
-	context.UpdatedAt = timeNow
+	record.CreatedAt = timeNow
+	record.UpdatedAt = timeNow
 
-	query, _, err := goqu.Insert(tbl_Context).Rows(context).ToSQL()
+	query, _, err := goqu.Insert(tbl_SchemaVariant).Rows(record).ToSQL()
 	if err != nil {
 		panic(err)
 	}
@@ -68,16 +74,16 @@ func (r *repositoryImpl) CreateContext(ctx context.Context, dbtx sqlpkg.DBTx, co
 	return nil
 }
 
-func (r *repositoryImpl) UpdateContext(ctx context.Context, tx sqlpkg.Tx, context Context) error {
+func (r *repositoryImpl) UpdateSchemaVariant(ctx context.Context, tx sqlpkg.Tx, record SchemaVariant) error {
 	const (
-		fn                   = "repositoryImpl.UpdateContext"
+		fn                   = "repositoryImpl.UpdateSchemaVariant"
 		expectedAffectedRows = 1
 	)
 
 	timeNow := timepkg.TimeNow()
-	context.UpdatedAt = timeNow
+	record.UpdatedAt = timeNow
 
-	query, _, err := goqu.Update(tbl_Context).Set(context).ToSQL()
+	query, _, err := goqu.Update(tbl_SchemaVariant).Set(record).ToSQL()
 	if err != nil {
 		panic(err)
 	}
