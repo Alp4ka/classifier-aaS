@@ -7,9 +7,9 @@ import (
 	"github.com/Alp4ka/classifier-aaS/internal/contextcomponent/repository"
 	"github.com/Alp4ka/classifier-aaS/internal/schemacomponent"
 	"github.com/Alp4ka/classifier-aaS/internal/storage"
+	sqlpkg "github.com/Alp4ka/classifier-aaS/pkg/sql"
 	timepkg "github.com/Alp4ka/classifier-aaS/pkg/time"
 	"github.com/google/uuid"
-	"github.com/jmoiron/sqlx"
 	"time"
 )
 
@@ -37,15 +37,16 @@ func (s *serviceImpl) closeSession(ctx context.Context, sessionID uuid.UUID) err
 
 	err := s.repo.WithTransaction(
 		ctx,
-		func(innerCtx context.Context, tx *sqlx.Tx) error {
-			return s.repo.UpdateSession(
+		func(innerCtx context.Context, tx sqlpkg.Tx) error {
+			_, err := s.repo.UpdateSession(
 				innerCtx,
 				tx,
-				&repository.Session{
+				repository.Session{
 					ID:    sessionID,
 					State: repository.SessionStateClosedAgent,
 				},
 			)
+			return err
 		},
 	)
 	if err != nil {
@@ -70,7 +71,7 @@ func (s *serviceImpl) AcquireSession(ctx context.Context, params *AcquireSession
 	var session *Session
 	err := s.repo.WithTransaction(
 		ctx,
-		func(ctx context.Context, tx *sqlx.Tx) error {
+		func(ctx context.Context, tx sqlpkg.Tx) error {
 			sessionRecord, err := s.repo.GetSession(
 				ctx,
 				s.repo.DB(),
@@ -91,7 +92,7 @@ func (s *serviceImpl) AcquireSession(ctx context.Context, params *AcquireSession
 					Gateway:    params.Gateway,
 					ValidUntil: timepkg.TimeNow().Add(DefaultSessionLifetime),
 				}
-				err = s.repo.CreateSession(ctx, s.repo.DB(), sessionRecord)
+				_, err = s.repo.CreateSession(ctx, s.repo.DB(), *sessionRecord)
 				if err != nil {
 					return err
 				}

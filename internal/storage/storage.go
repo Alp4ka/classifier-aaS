@@ -5,13 +5,15 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	sqlpkg "github.com/Alp4ka/classifier-aaS/pkg/sql"
 	"github.com/jmoiron/sqlx"
+	"runtime/debug"
 )
 
 type SQLStorage interface {
 	mustEmbedSQLStorageImpl()
 	DB() *sqlx.DB
-	WithTransaction(ctx context.Context, fn func(ctx context.Context, tx *sqlx.Tx) error) error
+	WithTransaction(ctx context.Context, fn func(ctx context.Context, tx sqlpkg.Tx) error) error
 }
 
 type SQLStorageImpl struct {
@@ -24,7 +26,7 @@ func (s *SQLStorageImpl) DB() *sqlx.DB {
 	return s.Db
 }
 
-func (s *SQLStorageImpl) WithTransaction(ctx context.Context, f func(context.Context, *sqlx.Tx) error) (err error) {
+func (s *SQLStorageImpl) WithTransaction(ctx context.Context, f func(context.Context, sqlpkg.Tx) error) (err error) {
 	const fn = "SQLStorageImpl.WithTransaction"
 	defer func() {
 		if err != nil {
@@ -40,7 +42,7 @@ func (s *SQLStorageImpl) WithTransaction(ctx context.Context, f func(context.Con
 	defer func() {
 		recoverRet := recover()
 		if recoverErr, ok := recoverRet.(error); ok {
-			err = recoverErr
+			err = fmt.Errorf("%w: %s", recoverErr, string(debug.Stack()))
 		}
 
 		rollbackErr := tx.Rollback()

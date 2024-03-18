@@ -9,14 +9,14 @@ import (
 
 type SessionRepository interface {
 	GetSession(ctx context.Context, dbtx sqlpkg.DBTx, filter *GetSessionFilter) (*Session, error)
-	CreateSession(ctx context.Context, dbtx sqlpkg.DBTx, session *Session) error
-	UpdateSession(ctx context.Context, dbtx sqlpkg.Tx, session *Session) error
+	CreateSession(ctx context.Context, dbtx sqlpkg.DBTx, session Session) (*Session, error)
+	UpdateSession(ctx context.Context, dbtx sqlpkg.Tx, session Session) (*Session, error)
 }
 
 type ContextRepository interface {
 	GetContext(ctx context.Context, dbtx sqlpkg.DBTx, filter *GetContextFilter) (*Context, error)
-	CreateContext(ctx context.Context, dbtx sqlpkg.DBTx, context Context) error
-	UpdateContext(ctx context.Context, dbtx sqlpkg.Tx, context Context) error
+	CreateContext(ctx context.Context, dbtx sqlpkg.DBTx, context Context) (*Context, error)
+	UpdateContext(ctx context.Context, dbtx sqlpkg.Tx, context Context) (*Context, error)
 }
 
 type EventRepository interface {

@@ -6,5 +6,5 @@ import (
 )
 
 func (s *HTTPServer) mwGetRecoverer() fiber.Handler {
-	return fiberrecover.New()
+	return fiberrecover.New(fiberrecover.Config{EnableStackTrace: true})
 }

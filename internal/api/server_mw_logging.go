@@ -8,36 +8,42 @@ import (
 	"time"
 )
 
-func (s *HTTPServer) mwLogging(c *fiber.Ctx) error {
-	rid := c.Locals(requestid.ConfigDefault.ContextKey).(string)
+func (s *HTTPServer) mwLogging() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		rid, _ := c.Locals(requestid.ConfigDefault.ContextKey).(string)
 
-	start := time.Now()
-	mlogger.L(c.UserContext()).Info(
-		"Request",
-		field.String("rid", rid),
-		field.String("method", c.Method()),
-		field.String("path", c.Path()),
-		field.String("req", string(c.Body())),
-		field.String("start", start.String()),
-	)
+		ctx := field.WithContextFields(
+			c.UserContext(),
+			field.String("rid", rid),
+			field.String("path", c.Path()),
+		)
+		c.SetUserContext(ctx)
 
-	err := c.Next()
-	if err != nil {
-		if err = c.App().ErrorHandler(c, err); err != nil {
-			_ = c.SendStatus(fiber.StatusInternalServerError)
+		start := time.Now()
+		mlogger.L(ctx).Info(
+			"Request",
+			field.String("method", c.Method()),
+			field.String("req", string(c.Body())),
+			field.String("start", start.String()),
+		)
+
+		err := c.Next()
+		if err != nil {
+			if err = c.App().ErrorHandler(c, err); err != nil {
+				_ = c.SendStatus(fiber.StatusInternalServerError)
+			}
 		}
+
+		end := time.Now()
+		mlogger.L(ctx).Info(
+			"Response",
+			field.String("resp", string(c.Response().Body())),
+			field.Int("status", c.Response().StatusCode()),
+			field.String("start", start.String()),
+			field.String("end", end.String()),
+			field.String("latency", end.Sub(start).String()),
+		)
+
+		return err
 	}
-
-	end := time.Now()
-	mlogger.L(c.UserContext()).Info(
-		"Response",
-		field.String("rid", rid),
-		field.String("resp", string(c.Response().Body())),
-		field.Int("status", c.Response().StatusCode()),
-		field.String("start", start.String()),
-		field.String("end", end.String()),
-		field.String("latency", end.Sub(start).String()),
-	)
-
-	return err
 }

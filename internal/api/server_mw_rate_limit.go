@@ -6,9 +6,9 @@ import (
 	"time"
 )
 
-func (s *HTTPServer) mwGetRateLimiter(rateLimit int) fiber.Handler {
+func (s *HTTPServer) mwGetRateLimiter() fiber.Handler {
 	return limiter.New(limiter.Config{
-		Max:        rateLimit,
+		Max:        s.rateLimit,
 		Expiration: 30 * time.Second,
 		KeyGenerator: func(c *fiber.Ctx) string {
 			return c.Get("x-forwarded-for")

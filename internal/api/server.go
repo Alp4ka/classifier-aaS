@@ -2,10 +2,13 @@ package api
 
 import (
 	"fmt"
+	_ "github.com/Alp4ka/classifier-aaS/cmd/app/docs"
 	"github.com/Alp4ka/classifier-aaS/internal/contextcomponent"
 	"github.com/Alp4ka/classifier-aaS/internal/schemacomponent"
+	globaltelemtry "github.com/Alp4ka/classifier-aaS/internal/telemetry"
+	"github.com/ansrivas/fiberprometheus/v2"
+	"github.com/gofiber/contrib/swagger"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/requestid"
 	"time"
 )
 
@@ -31,9 +34,10 @@ func NewHTTPServer(cfg Config) *HTTPServer {
 	}
 	server.app = fiber.New(
 		fiber.Config{
-			AppName:      _appName,
-			ErrorHandler: server.mwErrorHandler,
-			ReadTimeout:  _readTimeout,
+			AppName:               _appName,
+			ErrorHandler:          server.mwErrorHandler,
+			ReadTimeout:           _readTimeout,
+			DisableStartupMessage: true,
 		},
 	)
 
@@ -42,25 +46,37 @@ func NewHTTPServer(cfg Config) *HTTPServer {
 
 func (s *HTTPServer) configureRouting() {
 	// Middlewares.
-	s.app.Use(requestid.New())
 	s.app.Use(s.mwGetRecoverer())
-	s.app.Use(s.mwLogging)
+	s.app.Use(swagger.New(swagger.Config{
+		BasePath: "/",
+		FilePath: "./docs/swagger.json",
+		Path:     "swagger",
+		Title:    "Swagger API Docs",
+	}))
+	s.app.Use(s.mwGetRequestIDer())
+	s.app.Use(s.mwLogging())
 
 	// API Group
 	apiGroup := s.app.Group("/api")
-	apiGroup.Use(s.mwGetRateLimiter(s.rateLimit))
-	apiGroup.Use(s.mwContentChecker)
+	apiGroup.Use(s.mwGetRateLimiter())
+	apiGroup.Use(s.mwContentChecker())
 
 	// Schema.
 	schemaGroup := apiGroup.Group("/schema")
+	schemaGroup.Get("/:id", s.hGetActualSchema)
 	schemaGroup.Post("", s.hCreateSchema)
-	schemaGroup.Patch("", s.hPatchSchema)
-	schemaGroup.Get("/:id", s.hGetSchema)
+	schemaGroup.Put("", s.hUpdateSchema)
 }
 
 func (s *HTTPServer) Run() error {
 	s.configureRouting()
 	return s.app.Listen(fmt.Sprintf(":%d", s.port))
+}
+
+func (s *HTTPServer) WithMetrics() *HTTPServer {
+	prometheus := fiberprometheus.New(globaltelemtry.Namespace)
+	prometheus.RegisterAt(s.app, "/metrics")
+	return s
 }
 
 func (s *HTTPServer) Close() error {

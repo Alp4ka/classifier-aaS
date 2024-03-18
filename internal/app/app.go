@@ -35,7 +35,7 @@ func New(cfg Config) *App {
 					},
 				),
 			},
-		),
+		).WithMetrics(),
 	}
 }
 
@@ -54,6 +54,6 @@ func (a *App) Run(ctx context.Context) error {
 	}
 }
 
-func (a *App) Close() error {
-	return errors.Join(a.cfg.DB.Close(), a.httpServer.Close())
+func (a *App) Close() (err error) {
+	return errors.Join(err, a.httpServer.Close(), a.cfg.DB.Close())
 }

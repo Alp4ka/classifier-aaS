@@ -19,7 +19,7 @@ type GetSchemaFilter struct {
 }
 
 func (f *GetSchemaFilter) toDataset() *goqu.SelectDataset {
-	query := goqu.Select(tbl_Schema)
+	query := goqu.From(tbl_Schema)
 
 	if f == nil {
 		return query.Where(sqlpkg.UnrealCondition)
@@ -55,49 +55,46 @@ func (r *repositoryImpl) GetSchema(ctx context.Context, dbtx sqlpkg.DBTx, filter
 	return &ret, nil
 }
 
-func (r *repositoryImpl) CreateSchema(ctx context.Context, dbtx sqlpkg.DBTx, schema Schema) error {
+func (r *repositoryImpl) CreateSchema(ctx context.Context, dbtx sqlpkg.DBTx, schema Schema) (*Schema, error) {
 	const fn = "repositoryImpl.CreateSchema"
 
 	timeNow := timepkg.TimeNow()
 	schema.CreatedAt = timeNow
 	schema.UpdatedAt = timeNow
 
-	query, _, err := goqu.Insert(tbl_Schema).Rows(schema).ToSQL()
+	query, _, err := goqu.Insert(tbl_Schema).Rows(schema).Returning(tbl_Schema.All()).ToSQL()
 	if err != nil {
 		panic(err)
 	}
 
-	_, err = dbtx.ExecContext(ctx, query)
+	var ret Schema
+	err = dbtx.GetContext(ctx, &ret, query)
 	if err != nil {
-		return fmt.Errorf("%s: %w", fn, err)
+		return nil, fmt.Errorf("%s: %w", fn, err)
 	}
 
-	return nil
+	return &ret, nil
 }
 
-func (r *repositoryImpl) UpdateSchema(ctx context.Context, tx sqlpkg.Tx, schema Schema) error {
-	const (
-		fn                   = "repositoryImpl.UpdateSchema"
-		expectedAffectedRows = 1
-	)
+func (r *repositoryImpl) UpdateSchema(ctx context.Context, tx sqlpkg.Tx, schema Schema) (*Schema, error) {
+	const fn = "repositoryImpl.UpdateSchema"
 
 	timeNow := timepkg.TimeNow()
 	schema.UpdatedAt = timeNow
 
-	query, _, err := goqu.Update(tbl_Schema).Set(schema).ToSQL()
+	query, _, err := goqu.Update(tbl_Schema).Set(schema).Returning(tbl_Schema.All()).ToSQL()
 	if err != nil {
 		panic(err)
 	}
 
-	res, err := tx.ExecContext(ctx, query)
+	var ret Schema
+	err = tx.GetContext(ctx, &ret, query)
 	if err != nil {
-		return fmt.Errorf("%s: %w", fn, err)
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, storage.ErrEntityNotFound
+		}
+		return nil, fmt.Errorf("%s: %w", fn, err)
 	}
 
-	affected, err := res.RowsAffected()
-	if err != nil || affected != expectedAffectedRows {
-		return fmt.Errorf("%s: affected %d, expected %d; %w", fn, affected, expectedAffectedRows, err)
-	}
-
-	return nil
+	return &ret, nil
 }

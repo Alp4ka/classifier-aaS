@@ -14,9 +14,9 @@ var (
 )
 
 type Schema struct {
-	ID              uuid.UUID `json:"id" db:"id" goqu:"skipupdate"`
-	Gateway         string    `json:"gateway" db:"gateway"`
-	ActualVariantID uuid.UUID `json:"actualVariantID" db:"actual_variant_id"`
-	CreatedAt       time.Time `json:"createdAt" db:"created_at" goqu:"skipupdate"`
-	UpdatedAt       time.Time `json:"updatedAt" db:"updated_at"`
+	ID              uuid.UUID     `db:"id" goqu:"skipupdate"`
+	Gateway         string        `db:"gateway"`
+	ActualVariantID uuid.NullUUID `db:"actual_variant_id"`
+	CreatedAt       time.Time     `db:"created_at" goqu:"skipupdate"`
+	UpdatedAt       time.Time     `db:"updated_at"`
 }

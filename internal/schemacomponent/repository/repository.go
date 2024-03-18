@@ -9,14 +9,13 @@ import (
 
 type SchemaRepository interface {
 	GetSchema(ctx context.Context, dbtx sqlpkg.DBTx, filter *GetSchemaFilter) (*Schema, error)
-	CreateSchema(ctx context.Context, dbtx sqlpkg.DBTx, schema Schema) error
-	UpdateSchema(ctx context.Context, dbtx sqlpkg.Tx, schema Schema) error
+	CreateSchema(ctx context.Context, dbtx sqlpkg.DBTx, schema Schema) (*Schema, error)
+	UpdateSchema(ctx context.Context, dbtx sqlpkg.Tx, schema Schema) (*Schema, error)
 }
 
 type SchemaVariantRepository interface {
 	GetSchemaVariant(ctx context.Context, dbtx sqlpkg.DBTx, filter *GetSchemaVariantFilter) (*SchemaVariant, error)
-	CreateSchemaVariant(ctx context.Context, dbtx sqlpkg.DBTx, schema SchemaVariant) error
-	UpdateSchemaVariant(ctx context.Context, dbtx sqlpkg.Tx, schema SchemaVariant) error
+	CreateSchemaVariant(ctx context.Context, dbtx sqlpkg.DBTx, schema SchemaVariant) (*SchemaVariant, error)
 }
 
 type Repository interface {
