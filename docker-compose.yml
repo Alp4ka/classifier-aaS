@@ -1,6 +1,15 @@
 version: '3.7'
 
 services:
+  app:
+    build: .
+    restart: always
+    ports:
+      - "227:1111"
+    networks:
+      - classifier-aas-net
+    depends_on:
+      - pg
   pg:
     image: postgres:16
     restart: always
@@ -21,3 +30,4 @@ volumes:
 
 networks:
   classifier-aas-net:
+    driver: bridge

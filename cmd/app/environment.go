@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	classifier_aaS "github.com/Alp4ka/classifier-aaS"
+	classifieraas "github.com/Alp4ka/classifier-aaS"
 	"github.com/Alp4ka/classifier-aaS/internal/app"
 	"github.com/Alp4ka/classifier-aaS/internal/config"
 	dbpkg "github.com/Alp4ka/classifier-aaS/pkg/db"
@@ -39,7 +39,7 @@ func setupContext(env *environment) {
 }
 
 func setupLogging(env *environment) {
-	env.ctx = field.WithContextFields(env.ctx, field.String("appName", classifier_aaS.AppName))
+	env.ctx = field.WithContextFields(env.ctx, field.String("appName", classifieraas.AppName))
 	logger, err := mlogger.NewProduction(
 		env.ctx,
 		mlogger.Config{
