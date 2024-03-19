@@ -1,3 +1,12 @@
+//	@Summary		Обновить состояние счета
+//	@Description	Обновить состояние счета  и уведомить клиента.
+//	@Accept			json
+//	@Produce		json
+//	@Success		200			{object}	HandlerResp		"Состояние счета обновлено"
+//	@Failure		400			{object}	HandlerResp		"Ошибка валидации запроса"
+//	@Failure		500			{object}	HandlerResp	"Внутренняя ошибка сервиса"
+//	@Router			/api/schema/{id}  [get]
+
 package api
 
 import (

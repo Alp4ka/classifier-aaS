@@ -17,11 +17,9 @@ require (
 	github.com/jackc/pgx/v5 v5.5.4
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/stretchr/testify v1.9.0
-	github.com/swaggo/swag v1.16.3
 )
 
 require (
-	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/andybalholm/brotli v1.0.5 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
@@ -74,7 +72,6 @@ require (
 	golang.org/x/sync v0.2.0 // indirect
 	golang.org/x/sys v0.17.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
-	golang.org/x/tools v0.7.0 // indirect
 	google.golang.org/grpc v1.31.0 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

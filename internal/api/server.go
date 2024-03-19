@@ -2,19 +2,17 @@ package api
 
 import (
 	"fmt"
-	_ "github.com/Alp4ka/classifier-aaS/cmd/app/docs"
 	"github.com/Alp4ka/classifier-aaS/internal/contextcomponent"
 	"github.com/Alp4ka/classifier-aaS/internal/schemacomponent"
 	globaltelemtry "github.com/Alp4ka/classifier-aaS/internal/telemetry"
+	"github.com/Alp4ka/mlogger"
+	"github.com/Alp4ka/mlogger/field"
 	"github.com/ansrivas/fiberprometheus/v2"
-	"github.com/gofiber/contrib/swagger"
 	"github.com/gofiber/fiber/v2"
-	"time"
 )
 
 const (
-	_appName     = "http-api"
-	_readTimeout = 5 * time.Second
+	_appName = "http-api"
 )
 
 type HTTPServer struct {
@@ -36,8 +34,8 @@ func NewHTTPServer(cfg Config) *HTTPServer {
 		fiber.Config{
 			AppName:               _appName,
 			ErrorHandler:          server.mwErrorHandler,
-			ReadTimeout:           _readTimeout,
 			DisableStartupMessage: true,
+			DisableKeepalive:      true,
 		},
 	)
 
@@ -47,12 +45,7 @@ func NewHTTPServer(cfg Config) *HTTPServer {
 func (s *HTTPServer) configureRouting() {
 	// Middlewares.
 	s.app.Use(s.mwGetRecoverer())
-	s.app.Use(swagger.New(swagger.Config{
-		BasePath: "/",
-		FilePath: "./docs/swagger.json",
-		Path:     "swagger",
-		Title:    "Swagger API Docs",
-	}))
+	s.app.Use(s.mwGetSwagger())
 	s.app.Use(s.mwGetRequestIDer())
 	s.app.Use(s.mwLogging())
 
@@ -70,6 +63,7 @@ func (s *HTTPServer) configureRouting() {
 
 func (s *HTTPServer) Run() error {
 	s.configureRouting()
+	mlogger.L().Info("Listening API server", field.Int("port", s.port))
 	return s.app.Listen(fmt.Sprintf(":%d", s.port))
 }
 

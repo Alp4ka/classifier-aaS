@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	classifier_aaS "github.com/Alp4ka/classifier-aaS"
 	"github.com/Alp4ka/classifier-aaS/internal/app"
 	"github.com/Alp4ka/classifier-aaS/internal/config"
 	dbpkg "github.com/Alp4ka/classifier-aaS/pkg/db"
@@ -11,8 +12,6 @@ import (
 	"github.com/jmoiron/sqlx"
 	"log"
 )
-
-const AppName = "payment"
 
 type environment struct {
 	ctx        context.Context
@@ -40,6 +39,7 @@ func setupContext(env *environment) {
 }
 
 func setupLogging(env *environment) {
+	env.ctx = field.WithContextFields(env.ctx, field.String("appName", classifier_aaS.AppName))
 	logger, err := mlogger.NewProduction(
 		env.ctx,
 		mlogger.Config{
@@ -49,7 +49,6 @@ func setupLogging(env *environment) {
 	if err != nil {
 		log.Fatal("could not create logger", err)
 	}
-
 	mlogger.ReplaceGlobals(logger)
 }
 

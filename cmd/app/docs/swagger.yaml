@@ -1,4 +1,187 @@
+openapi: 3.0.0
 info:
-  contact: {}
-paths: {}
-swagger: "2.0"
+  title: ClassifierAAS API
+  version: 1.0.0
+paths:
+  /api/schema/{id}:
+    get:
+      summary: Get schema and its actual version by ID
+      tags:
+        - Schema
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      gateway:
+                        type: string
+                      actualVariant:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                          description:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                  format: uuid
+                                type:
+                                  type: string
+                                nextID:
+                                  type: string
+                                  format: uuid
+                                nextErrorID:
+                                  type: string
+                                  format: uuid
+                                data:
+                                  type: object
+                                  properties:
+                                    zhopaInt:
+                                      type: integer
+                                    zhopaString:
+                                      type: string
+                          createdAt:
+                            type: string
+                            format: date-time
+                          updatedAt:
+                            type: string
+                            format: date-time
+                      createdAt:
+                        type: string
+                        format: date-time
+                      updatedAt:
+                        type: string
+                        format: date-time
+  /api/schema:
+    post:
+      tags:
+        - Schema
+      summary: Create new schema
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                gateway:
+                  type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Schema'
+    put:
+      tags:
+        - Schema
+      summary: Update existing schema
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                description:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      type:
+                        type: string
+                      nextID:
+                        type: string
+                        format: uuid
+                      nextErrorID:
+                        type: string
+                        format: uuid
+                      data:
+                        type: object
+                gateway:
+                  type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Schema'
+components:
+  schemas:
+    Schema:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            gateway:
+              type: string
+            actualVariant:
+              type: object
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                description:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      type:
+                        type: string
+                      nextID:
+                        type: string
+                        format: uuid
+                      nextErrorID:
+                        type: string
+                        format: uuid
+                      data:
+                        type: object
+                createdAt:
+                  type: string
+                  format: date-time
+                updatedAt:
+                  type: string
+                  format: date-time
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time

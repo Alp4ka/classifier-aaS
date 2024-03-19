@@ -48,7 +48,7 @@ func (a *App) Run(ctx context.Context) error {
 
 	select {
 	case <-ctx.Done():
-		return ctx.Err()
+		return errors.Join(ctx.Err(), a.httpServer.Close())
 	case err := <-errCh:
 		return err
 	}
