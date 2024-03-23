@@ -12,7 +12,6 @@ CREATE TABLE IF NOT EXISTS schema_variant
 CREATE TABLE IF NOT EXISTS schema
 (
     id                UUID PRIMARY KEY            DEFAULT uuid_generate_v4(),
-    gateway           TEXT                                      NOT NULL,
     actual_variant_id UUID REFERENCES schema_variant (id)       NOT NULL,
     created_at        TIMESTAMP WITHOUT TIME ZONE DEFAULT now() NOT NULL,
     updated_at        TIMESTAMP WITHOUT TIME ZONE DEFAULT now() NOT NULL

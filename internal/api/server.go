@@ -44,14 +44,15 @@ func NewHTTPServer(cfg Config) *HTTPServer {
 
 func (s *HTTPServer) configureRouting() {
 	// Middlewares.
-	s.app.Use(s.mwGetRecoverer())
-	s.app.Use(s.mwGetSwagger())
-	s.app.Use(s.mwGetRequestIDer())
+	s.app.Use(s.mwRecoverer())
+	s.app.Use(s.mwCors())
+	s.app.Use(s.mwSwagger())
+	s.app.Use(s.mwRequestID())
 	s.app.Use(s.mwLogging())
 
 	// API Group
 	apiGroup := s.app.Group("/api")
-	apiGroup.Use(s.mwGetRateLimiter())
+	apiGroup.Use(s.mwRateLimiter())
 	apiGroup.Use(s.mwContentChecker())
 
 	// Schema.

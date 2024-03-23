@@ -15,7 +15,6 @@ var (
 
 type Schema struct {
 	ID              uuid.UUID     `db:"id" goqu:"skipupdate"`
-	Gateway         string        `db:"gateway"`
 	ActualVariantID uuid.NullUUID `db:"actual_variant_id"`
 	CreatedAt       time.Time     `db:"created_at" goqu:"skipupdate"`
 	UpdatedAt       time.Time     `db:"updated_at"`

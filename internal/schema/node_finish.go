@@ -20,4 +20,8 @@ func (n *NodeFinish) Validate() error {
 	return nil
 }
 
+func (n *NodeFinish) FromNode(node Node) error {
+	return n.BaseNode.FromNode(node)
+}
+
 var _ Node = (*NodeFinish)(nil)

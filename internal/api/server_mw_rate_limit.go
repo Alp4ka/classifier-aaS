@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func (s *HTTPServer) mwGetRateLimiter() fiber.Handler {
+func (s *HTTPServer) mwRateLimiter() fiber.Handler {
 	return limiter.New(limiter.Config{
 		Max:        s.rateLimit,
 		Expiration: 30 * time.Second,

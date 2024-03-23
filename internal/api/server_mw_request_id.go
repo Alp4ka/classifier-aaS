@@ -5,6 +5,6 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 )
 
-func (s *HTTPServer) mwGetRequestIDer() fiber.Handler {
+func (s *HTTPServer) mwRequestID() fiber.Handler {
 	return requestid.New()
 }

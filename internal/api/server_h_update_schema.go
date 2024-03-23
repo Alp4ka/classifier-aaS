@@ -8,13 +8,11 @@ import (
 	"github.com/Alp4ka/mlogger/field"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
-	"github.com/guregu/null/v5"
 )
 
 type hUpdateSchemaReq struct {
 	ID          uuid.UUID           `json:"id"`
 	Description *schema.Description `json:"description"`
-	Gateway     null.String         `json:"gateway"`
 }
 
 func (s *HTTPServer) hUpdateSchema(c *fiber.Ctx) error {
@@ -28,7 +26,6 @@ func (s *HTTPServer) hUpdateSchema(c *fiber.Ctx) error {
 	schemaModel, err := s.schemaService.UpdateSchema(ctx,
 		&schemacomponent.UpdateSchemaParams{
 			ID:          req.ID,
-			Gateway:     req.Gateway,
 			Description: req.Description,
 		},
 	)

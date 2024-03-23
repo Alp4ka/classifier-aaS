@@ -5,7 +5,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func (s *HTTPServer) mwGetSwagger() fiber.Handler {
+func (s *HTTPServer) mwSwagger() fiber.Handler {
 	return swagger.New(swagger.Config{
 		BasePath: "/",
 		FilePath: "./docs/swagger.yaml",

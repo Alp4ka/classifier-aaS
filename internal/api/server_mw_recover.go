@@ -5,6 +5,6 @@ import (
 	fiberrecover "github.com/gofiber/fiber/v2/middleware/recover"
 )
 
-func (s *HTTPServer) mwGetRecoverer() fiber.Handler {
+func (s *HTTPServer) mwRecoverer() fiber.Handler {
 	return fiberrecover.New(fiberrecover.Config{EnableStackTrace: true})
 }

@@ -9,7 +9,6 @@ import (
 	"github.com/Alp4ka/classifier-aaS/internal/storage"
 	sqlpkg "github.com/Alp4ka/classifier-aaS/pkg/sql"
 	"github.com/google/uuid"
-	"github.com/guregu/null/v5"
 )
 
 type Config struct {
@@ -50,7 +49,6 @@ func (s *serviceImpl) GetSchema(ctx context.Context, filter *GetSchemaFilter) (*
 				ID:        schemaRecord.ID,
 				CreatedAt: schemaRecord.CreatedAt,
 				UpdatedAt: schemaRecord.UpdatedAt,
-				Gateway:   schemaRecord.Gateway,
 			}
 			if !schemaRecord.ActualVariantID.Valid {
 				return nil
@@ -64,7 +62,7 @@ func (s *serviceImpl) GetSchema(ctx context.Context, filter *GetSchemaFilter) (*
 			if err != nil {
 				return err
 			}
-			ret.ActualVariant = &schema.SchemaVariant{
+			ret.ActualVariant = &schema.Variant{
 				ID:          schemaVariantRecord.ID,
 				Description: schemaVariantRecord.Description,
 				CreatedAt:   schemaVariantRecord.CreatedAt,
@@ -81,7 +79,6 @@ func (s *serviceImpl) GetSchema(ctx context.Context, filter *GetSchemaFilter) (*
 }
 
 type CreateSchemaParams struct {
-	Gateway string
 }
 
 func (s *serviceImpl) CreateSchema(ctx context.Context, params *CreateSchemaParams) (*schema.Schema, error) {
@@ -102,7 +99,6 @@ func (s *serviceImpl) CreateSchema(ctx context.Context, params *CreateSchemaPara
 			schemaRecord, err := s.repo.CreateSchema(ctx, tx,
 				repository.Schema{
 					ID:              uuid.New(),
-					Gateway:         params.Gateway,
 					ActualVariantID: uuid.NullUUID{UUID: schemaVariantRecord.ID, Valid: true},
 				},
 			)
@@ -114,13 +110,12 @@ func (s *serviceImpl) CreateSchema(ctx context.Context, params *CreateSchemaPara
 				ID:        schemaRecord.ID,
 				CreatedAt: schemaRecord.CreatedAt,
 				UpdatedAt: schemaRecord.UpdatedAt,
-				ActualVariant: &schema.SchemaVariant{
+				ActualVariant: &schema.Variant{
 					ID:          schemaVariantRecord.ID,
 					Description: schemaVariantRecord.Description,
 					CreatedAt:   schemaVariantRecord.CreatedAt,
 					UpdatedAt:   schemaVariantRecord.UpdatedAt,
 				},
-				Gateway: schemaRecord.Gateway,
 			}
 			return nil
 		},
@@ -135,7 +130,6 @@ func (s *serviceImpl) CreateSchema(ctx context.Context, params *CreateSchemaPara
 type UpdateSchemaParams struct {
 	ID          uuid.UUID           `json:"id"`
 	Description *schema.Description `json:"description"`
-	Gateway     null.String         `json:"gateway"`
 }
 
 func (s *serviceImpl) UpdateSchema(ctx context.Context, params *UpdateSchemaParams) (*schema.Schema, error) {
@@ -176,11 +170,7 @@ func (s *serviceImpl) UpdateSchema(ctx context.Context, params *UpdateSchemaPara
 
 			updateSchemaParams := repository.Schema{
 				ID:              schemaRecord.ID,
-				Gateway:         schemaRecord.Gateway,
 				ActualVariantID: uuid.NullUUID{UUID: schemaVariantRecord.ID, Valid: true},
-			}
-			if params.Gateway.Valid {
-				updateSchemaParams.Gateway = params.Gateway.String
 			}
 			schemaRecord, err = s.repo.UpdateSchema(ctx, tx, updateSchemaParams)
 			if err != nil {
@@ -191,13 +181,12 @@ func (s *serviceImpl) UpdateSchema(ctx context.Context, params *UpdateSchemaPara
 				ID:        schemaRecord.ID,
 				CreatedAt: schemaRecord.CreatedAt,
 				UpdatedAt: schemaRecord.UpdatedAt,
-				ActualVariant: &schema.SchemaVariant{
+				ActualVariant: &schema.Variant{
 					ID:          schemaVariantRecord.ID,
 					Description: schemaVariantRecord.Description,
 					CreatedAt:   schemaVariantRecord.CreatedAt,
 					UpdatedAt:   schemaVariantRecord.UpdatedAt,
 				},
-				Gateway: schemaRecord.Gateway,
 			}
 			return nil
 		},

@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 
-const MaxNodesCount = 10
+const MaxNodesCount = 12
 
 type Description struct {
 	nodes []*BaseNode
@@ -28,10 +28,6 @@ func (d *Description) MarshalJSON() ([]byte, error) {
 }
 
 func (d *Description) Scan(value interface{}) error {
-	if value == nil {
-		return fmt.Errorf("can't scan nil pointer")
-	}
-
 	valueBytes, ok := value.([]byte)
 	if !ok {
 		return fmt.Errorf("can't scan %T as Description", value)
@@ -127,15 +123,3 @@ func (d *Description) MapAndValidate() (map[NodeID]Node, error) {
 
 	return mapping, nil
 }
-
-//type Processor struct {
-//	desc Description
-//}
-//
-//func NewProcessor(desc Description) *Processor {
-//	return &Processor{desc: desc}
-//}
-//
-//func (p *Processor) Process(schema *Schema) *Schema {
-//
-//}

@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type SchemaVariant struct {
+type Variant struct {
 	ID          uuid.UUID   `json:"id,omitempty"`
 	Description Description `json:"description"`
 	CreatedAt   time.Time   `json:"createdAt"`
@@ -13,9 +13,8 @@ type SchemaVariant struct {
 }
 
 type Schema struct {
-	ID            uuid.UUID      `json:"id"`
-	Gateway       string         `json:"gateway"`
-	ActualVariant *SchemaVariant `json:"actualVariant"`
-	CreatedAt     time.Time      `json:"createdAt"`
-	UpdatedAt     time.Time      `json:"updatedAt"`
+	ID            uuid.UUID `json:"id"`
+	ActualVariant *Variant  `json:"actualVariant"`
+	CreatedAt     time.Time `json:"createdAt"`
+	UpdatedAt     time.Time `json:"updatedAt"`
 }

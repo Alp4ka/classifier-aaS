@@ -21,59 +21,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  data:
-                    type: object
-                    properties:
-                      id:
-                        type: string
-                        format: uuid
-                      gateway:
-                        type: string
-                      actualVariant:
-                        type: object
-                        properties:
-                          id:
-                            type: string
-                            format: uuid
-                          description:
-                            type: array
-                            items:
-                              type: object
-                              properties:
-                                id:
-                                  type: string
-                                  format: uuid
-                                type:
-                                  type: string
-                                nextID:
-                                  type: string
-                                  format: uuid
-                                nextErrorID:
-                                  type: string
-                                  format: uuid
-                                data:
-                                  type: object
-                                  properties:
-                                    zhopaInt:
-                                      type: integer
-                                    zhopaString:
-                                      type: string
-                          createdAt:
-                            type: string
-                            format: date-time
-                          updatedAt:
-                            type: string
-                            format: date-time
-                      createdAt:
-                        type: string
-                        format: date-time
-                      updatedAt:
-                        type: string
-                        format: date-time
+                $ref: '#/components/schemas/Schema'
   /api/schema:
     post:
       tags:
@@ -85,8 +33,6 @@ paths:
             schema:
               type: object
               properties:
-                gateway:
-                  type: string
       responses:
         '200':
           description: Successful response
@@ -125,8 +71,6 @@ paths:
                         format: uuid
                       data:
                         type: object
-                gateway:
-                  type: string
       responses:
         '200':
           description: Successful response
@@ -147,8 +91,6 @@ components:
             id:
               type: string
               format: uuid
-            gateway:
-              type: string
             actualVariant:
               type: object
               properties:
@@ -172,6 +114,8 @@ components:
                         type: string
                         format: uuid
                       data:
+                        type: object
+                      gridData:
                         type: object
                 createdAt:
                   type: string

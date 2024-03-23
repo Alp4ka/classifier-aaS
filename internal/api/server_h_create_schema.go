@@ -9,7 +9,6 @@ import (
 
 // TODO: Validation.
 type hCreateSchemaReq struct {
-	Gateway string `json:"gateway" validate:"required"`
 }
 
 func (s *HTTPServer) hCreateSchema(c *fiber.Ctx) error {
@@ -20,11 +19,7 @@ func (s *HTTPServer) hCreateSchema(c *fiber.Ctx) error {
 		return err
 	}
 
-	schema, err := s.schemaService.CreateSchema(c.Context(),
-		&schemacomponent.CreateSchemaParams{
-			Gateway: req.Gateway,
-		},
-	)
+	schema, err := s.schemaService.CreateSchema(c.Context(), &schemacomponent.CreateSchemaParams{})
 	if err != nil {
 		mlogger.L(ctx).Error("Error while creating schema", field.Error(err))
 		return c.SendStatus(fiber.StatusInternalServerError)

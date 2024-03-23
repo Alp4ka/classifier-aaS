@@ -25,27 +25,24 @@ const (
 	NodeTypeFinish          NodeType = "finish"
 	NodeTypeListen          NodeType = "listen"
 	NodeTypeRespond         NodeType = "respond"
-	NodeTypeIfElse          NodeType = "if_else"
 	NodeTypeClassify        NodeType = "classify"
-	NodeExternalRESTRequest NodeType = "external_request"
+	NodeTypeExternalRequest NodeType = "external_request"
 )
 
 // NOTE: Does not supposed to be changed in runtime.
 var _nodeTypeToInputType = map[NodeType]NodeDataType{
 	NodeTypeListen:          DataTypeString,
 	NodeTypeRespond:         DataTypeString,
-	NodeTypeIfElse:          DataTypeString,
 	NodeTypeClassify:        DataTypeJSON,
-	NodeExternalRESTRequest: DataTypeString,
+	NodeTypeExternalRequest: DataTypeString,
 }
 
 // NOTE: Does not supposed to be changed in runtime.
 var _nodeTypeToOutputType = map[NodeType]NodeDataType{
 	NodeTypeListen:          DataTypeString,
 	NodeTypeRespond:         DataTypeString,
-	NodeTypeIfElse:          DataTypeString,
 	NodeTypeClassify:        DataTypeString,
-	NodeExternalRESTRequest: DataTypeString,
+	NodeTypeExternalRequest: DataTypeString,
 }
 
 type Node interface {
@@ -60,6 +57,7 @@ type Node interface {
 	GetNextErrorID() uuid.NullUUID
 	GetNextID() uuid.NullUUID
 	GetData() map[string]any
+	GetGridData() map[string]any
 }
 
 type BaseNode struct {
@@ -68,6 +66,7 @@ type BaseNode struct {
 	NextID      uuid.NullUUID  `json:"nextID"`
 	NextErrorID uuid.NullUUID  `json:"nextErrorID"`
 	Data        map[string]any `json:"data"`
+	GridData    map[string]any `json:"gridData"`
 }
 
 func (n *BaseNode) mustEmbedBaseNode() {}
@@ -78,6 +77,7 @@ func (n *BaseNode) FromNode(node Node) error {
 	n.NextID = node.GetNextID()
 	n.NextErrorID = node.GetNextErrorID()
 	n.Data = node.GetData()
+	n.GridData = node.GetGridData()
 	return nil
 }
 
@@ -113,6 +113,10 @@ func (n *BaseNode) GetData() map[string]any {
 	return n.Data
 }
 
+func (n *BaseNode) GetGridData() map[string]any {
+	return n.GridData
+}
+
 var _ Node = (*BaseNode)(nil)
 
 func FromNode(node Node) (Node, error) {
@@ -122,6 +126,14 @@ func FromNode(node Node) (Node, error) {
 		ret = &NodeStart{}
 	case NodeTypeFinish:
 		ret = &NodeFinish{}
+	case NodeTypeListen:
+		ret = &NodeListen{}
+	case NodeTypeClassify:
+		ret = &NodeClassify{}
+	case NodeTypeRespond:
+		ret = &NodeRespond{}
+	case NodeTypeExternalRequest:
+		ret = &NodeExternalRequest{}
 	default:
 		return nil, fmt.Errorf("unknown node type %s", node.GetType())
 	}
