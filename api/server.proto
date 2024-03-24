@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+
+option go_package = "github.com/Alp4ka/classifier-aaS/pkg/api";
+
+package api;
+
+message AcquireSessionRequest {
+  optional string id = 1;
+  optional string agent = 3;
+  string gateway = 2;
+}
+
+message AcquireSessionResponse {
+  string id = 1;
+}
+
+message ReleaseSessionRequest {
+  string id = 1;
+}
+
+message ReleaseSessionResponse {
+}
+
+message ProcessRequest {
+  optional string id = 1;
+  string request_data = 2;
+}
+
+message ProcessResponse {
+  int64 event_id = 1;
+  optional string response_data = 2;
+  int32 step = 3;
+  bool end = 4;
+}
+
+service GWManagerService {
+  rpc AcquireSession(AcquireSessionRequest) returns (AcquireSessionResponse);
+  rpc ReleaseSession(ReleaseSessionRequest) returns (ReleaseSessionResponse);
+  rpc Process(stream ProcessRequest) returns (stream ProcessResponse);
+}

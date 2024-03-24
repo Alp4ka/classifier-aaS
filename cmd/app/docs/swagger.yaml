@@ -71,6 +71,8 @@ paths:
                         format: uuid
                       data:
                         type: object
+                      gridData:
+                        type: object
       responses:
         '200':
           description: Successful response

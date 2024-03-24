@@ -14,7 +14,6 @@ type App struct {
 	cfg Config
 
 	httpServer *api.HTTPServer
-	//gateways       []gateways.Gateway
 }
 
 func New(cfg Config) *App {
