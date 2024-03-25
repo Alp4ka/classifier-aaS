@@ -88,6 +88,13 @@ func (s *serviceImpl) CreateSchema(ctx context.Context, params *CreateSchemaPara
 	var ret *schema.Schema
 	err := s.repo.WithTransaction(ctx,
 		func(ctx context.Context, tx sqlpkg.Tx) error {
+			_, err := s.repo.GetSchema(ctx, tx, &repository.GetSchemaFilter{Latest: null.BoolFrom(true)})
+			if err != nil && !errors.Is(err, storage.ErrEntityNotFound) {
+				return err
+			} else if err == nil {
+				return ErrOnlySingleSchemaAvailable
+			}
+
 			schemaVariantRecord, err := s.repo.CreateSchemaVariant(ctx, tx,
 				repository.SchemaVariant{
 					ID:          uuid.New(),

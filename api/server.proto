@@ -4,11 +4,9 @@ package api;
 option go_package = ".;api";
 
 
-
 message AcquireSessionRequest {
-  string session_id = 1;
-  string agent = 2;
-  string gateway = 3;
+  string agent = 1;
+  string gateway = 2;
 }
 
 message AcquireSessionResponse {

@@ -53,7 +53,7 @@ func (r *repositoryImpl) GetSchemaVariant(ctx context.Context, dbtx sqlpkg.DBTx,
 func (r *repositoryImpl) CreateSchemaVariant(ctx context.Context, dbtx sqlpkg.DBTx, record SchemaVariant) (*SchemaVariant, error) {
 	const fn = "repositoryImpl.CreateSchemaVariant"
 
-	timeNow := timepkg.TimeNow()
+	timeNow := timepkg.Now()
 	record.CreatedAt = timeNow
 	record.UpdatedAt = timeNow
 

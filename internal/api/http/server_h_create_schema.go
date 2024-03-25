@@ -1,13 +1,13 @@
 package http
 
 import (
+	"errors"
 	"github.com/Alp4ka/classifier-aaS/internal/schemacomponent"
 	"github.com/Alp4ka/mlogger"
 	"github.com/Alp4ka/mlogger/field"
 	"github.com/gofiber/fiber/v2"
 )
 
-// TODO: Validation.
 type hCreateSchemaReq struct {
 }
 
@@ -21,6 +21,16 @@ func (s *Server) hCreateSchema(c *fiber.Ctx) error {
 
 	schema, err := s.schemaService.CreateSchema(c.Context(), &schemacomponent.CreateSchemaParams{})
 	if err != nil {
+		if errors.Is(err, schemacomponent.ErrOnlySingleSchemaAvailable) {
+			return c.
+				Status(fiber.StatusConflict).
+				JSON(
+					HandlerResp{
+						Success: false,
+						Message: "single schema available!",
+					},
+				)
+		}
 		mlogger.L(ctx).Error("Error while creating schema", field.Error(err))
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}

@@ -10,12 +10,52 @@ import (
 	timepkg "github.com/Alp4ka/classifier-aaS/pkg/time"
 	"github.com/doug-martin/goqu/v9"
 	"github.com/google/uuid"
+	"github.com/guregu/null/v5"
 )
 
-func (r *repositoryImpl) GetSession(ctx context.Context, dbtx sqlpkg.DBTx, id uuid.UUID) (*Session, error) {
+type GetSessionFilter struct {
+	ID      uuid.NullUUID
+	Gateway null.String
+	Agent   null.String
+	Active  null.Bool
+}
+
+func (f *GetSessionFilter) toDataset() *goqu.SelectDataset {
+	query := goqu.From(tbl_Session)
+
+	if f.ID.Valid {
+		query = query.Where(tbl_Session.Col("id").Eq(f.ID.UUID))
+	}
+
+	if f.Gateway.Valid {
+		query = query.Where(tbl_Session.Col("gateway").Eq(f.Gateway.String))
+	}
+
+	if f.Agent.Valid {
+		query = query.Where(tbl_Session.Col("agent").Eq(f.Agent.String))
+	}
+
+	if f.Agent.Valid || f.Gateway.Valid {
+		query.Order(tbl_Session.Col("created_at").Asc()).Limit(1)
+	}
+
+	if f.Active.Valid {
+		if !f.Active.Bool {
+			panic("unexpected filter active was false")
+		}
+		query = query.
+			Where(tbl_Session.Col("valid_until").Gt(timepkg.Now())).
+			Where(tbl_Session.Col("state").Eq(SessionStateActive)).
+			Where(tbl_Session.Col("closed_at").IsNull())
+	}
+
+	return query
+}
+
+func (r *repositoryImpl) GetSession(ctx context.Context, dbtx sqlpkg.DBTx, filter *GetSessionFilter) (*Session, error) {
 	const fn = "repositoryImpl.GetSession"
 
-	query, _, err := goqu.From(tbl_Session).Where(tbl_Session.Col("id").Eq(id)).ToSQL()
+	query, _, err := filter.toDataset().ToSQL()
 	if err != nil {
 		panic(err)
 	}
@@ -35,7 +75,7 @@ func (r *repositoryImpl) GetSession(ctx context.Context, dbtx sqlpkg.DBTx, id uu
 func (r *repositoryImpl) CreateSession(ctx context.Context, dbtx sqlpkg.DBTx, session Session) (*Session, error) {
 	const fn = "repositoryImpl.CreateSession"
 
-	timeNow := timepkg.TimeNow()
+	timeNow := timepkg.Now()
 	session.CreatedAt = timeNow
 	session.UpdatedAt = timeNow
 
@@ -56,9 +96,9 @@ func (r *repositoryImpl) CreateSession(ctx context.Context, dbtx sqlpkg.DBTx, se
 func (r *repositoryImpl) UpdateSession(ctx context.Context, tx sqlpkg.Tx, session Session) (*Session, error) {
 	const fn = "repositoryImpl.UpdateSession"
 
-	session.UpdatedAt = timepkg.TimeNow()
+	session.UpdatedAt = timepkg.Now()
 
-	query, _, err := goqu.Update(tbl_Session).Set(session).Returning(tbl_Session.All()).ToSQL()
+	query, _, err := goqu.Update(tbl_Session).Set(session).Where(tbl_Session.Col("id").Eq(session.ID)).Returning(tbl_Session.All()).ToSQL()
 	if err != nil {
 		panic(err)
 	}

@@ -45,8 +45,9 @@ func (s *serviceImpl) ReleaseSession(ctx context.Context, sessionID uuid.UUID) e
 				innerCtx,
 				tx,
 				repository.Session{
-					ID:    sessionID,
-					State: repository.SessionStateClosedAgent,
+					ID:       sessionID,
+					State:    repository.SessionStateClosedAgent,
+					ClosedAt: null.TimeFrom(timepkg.Now()),
 				},
 			)
 			return err
@@ -60,7 +61,11 @@ func (s *serviceImpl) ReleaseSession(ctx context.Context, sessionID uuid.UUID) e
 }
 
 type GetSessionParams struct {
-	SessionID uuid.UUID
+	SessionID uuid.NullUUID
+
+	Gateway null.String
+	Agent   null.String
+	Active  null.Bool
 }
 
 func (s *serviceImpl) GetSession(ctx context.Context, params *GetSessionParams) (*Session, error) {
@@ -70,14 +75,17 @@ func (s *serviceImpl) GetSession(ctx context.Context, params *GetSessionParams) 
 	err := s.repo.WithTransaction(
 		ctx,
 		func(ctx context.Context, tx sqlpkg.Tx) error {
-			sessionRecord, err := s.repo.GetSession(ctx, tx, params.SessionID)
+			sessionRecord, err := s.repo.GetSession(ctx, tx, &repository.GetSessionFilter{
+				ID:      params.SessionID,
+				Gateway: params.Gateway,
+				Agent:   params.Agent,
+				Active:  params.Active,
+			})
 			if err != nil {
 				if errors.Is(err, storage.ErrEntityNotFound) {
 					return ErrSessionDoesNotExist
 				}
 				return err
-			} else if sessionRecord.ValidUntil.Before(time.Now()) {
-				return ErrSessionExpired
 			}
 
 			schemaVariantRecord, err := s.schemaService.GetSchemaVariant(ctx, sessionRecord.SchemaVariantID)
@@ -138,7 +146,7 @@ func (s *serviceImpl) CreateSession(ctx context.Context, params *CreateSessionPa
 				State:           repository.SessionStateActive,
 				Agent:           params.Agent,
 				Gateway:         params.Gateway,
-				ValidUntil:      timepkg.TimeNow().Add(DefaultSessionLifetime),
+				ValidUntil:      timepkg.Now().Add(DefaultSessionLifetime),
 				ClosedAt:        null.TimeFromPtr(nil),
 				SchemaVariantID: recentSchema.ActualVariant.ID,
 				SchemaNodeID:    startNode.GetID(),
@@ -159,23 +167,30 @@ func (s *serviceImpl) CreateSession(ctx context.Context, params *CreateSessionPa
 }
 
 type AcquireSessionParams struct {
-	SessionID uuid.UUID
-	Agent     string
-	Gateway   string
+	Agent   string
+	Gateway string
 }
 
 func (s *serviceImpl) AcquireSession(ctx context.Context, params *AcquireSessionParams) (*Session, error) {
 	const fn = "serviceImpl.AcquireSession"
 
-	session, err := s.GetSession(ctx, &GetSessionParams{SessionID: params.SessionID})
+	session, err := s.GetSession(ctx, &GetSessionParams{
+		Gateway: null.StringFrom(params.Gateway),
+		Agent:   null.StringFrom(params.Agent),
+		Active:  null.BoolFrom(true),
+	})
 	if err == nil {
-		return session, nil
-	} else if !errors.Is(err, ErrSessionExpired) && !errors.Is(err, ErrSessionDoesNotExist) {
+		if !session.Model.ValidUntil.Before(timepkg.Now()) &&
+			session.Model.State == repository.SessionStateActive &&
+			!session.Model.ClosedAt.Valid {
+			return session, nil
+		}
+	} else if !errors.Is(err, ErrSessionDoesNotExist) {
 		return nil, fmt.Errorf("%s: %w", fn, err)
 	}
 
 	session, err = s.CreateSession(ctx, &CreateSessionParams{
-		SessionID: params.SessionID,
+		SessionID: uuid.New(),
 		Agent:     params.Agent,
 		Gateway:   params.Gateway,
 	})

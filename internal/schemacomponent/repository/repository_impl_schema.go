@@ -59,7 +59,7 @@ func (r *repositoryImpl) GetSchema(ctx context.Context, dbtx sqlpkg.DBTx, filter
 func (r *repositoryImpl) CreateSchema(ctx context.Context, dbtx sqlpkg.DBTx, schema Schema) (*Schema, error) {
 	const fn = "repositoryImpl.CreateSchema"
 
-	timeNow := timepkg.TimeNow()
+	timeNow := timepkg.Now()
 	schema.CreatedAt = timeNow
 	schema.UpdatedAt = timeNow
 
@@ -80,7 +80,7 @@ func (r *repositoryImpl) CreateSchema(ctx context.Context, dbtx sqlpkg.DBTx, sch
 func (r *repositoryImpl) UpdateSchema(ctx context.Context, tx sqlpkg.Tx, schema Schema) (*Schema, error) {
 	const fn = "repositoryImpl.UpdateSchema"
 
-	timeNow := timepkg.TimeNow()
+	timeNow := timepkg.Now()
 	schema.UpdatedAt = timeNow
 
 	query, _, err := goqu.Update(tbl_Schema).Set(schema).Returning(tbl_Schema.All()).ToSQL()

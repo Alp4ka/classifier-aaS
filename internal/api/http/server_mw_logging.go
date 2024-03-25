@@ -1,11 +1,11 @@
 package http
 
 import (
+	timepkg "github.com/Alp4ka/classifier-aaS/pkg/time"
 	"github.com/Alp4ka/mlogger"
 	"github.com/Alp4ka/mlogger/field"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
-	"time"
 )
 
 func (s *Server) mwLogging() fiber.Handler {
@@ -19,7 +19,7 @@ func (s *Server) mwLogging() fiber.Handler {
 		)
 		c.SetUserContext(ctx)
 
-		start := time.Now()
+		start := timepkg.Now()
 		mlogger.L(ctx).Info(
 			"Request",
 			field.String("method", c.Method()),
@@ -34,7 +34,7 @@ func (s *Server) mwLogging() fiber.Handler {
 			}
 		}
 
-		end := time.Now()
+		end := timepkg.Now()
 		mlogger.L(ctx).Info(
 			"Response",
 			field.String("resp", string(c.Response().Body())),

@@ -9,8 +9,6 @@ type HandlerResp struct {
 }
 
 func (s *Server) mwErrorHandler(c *fiber.Ctx, err error) error {
-	// TODO(Gorkovets Roman): User friendly error handling.
-
 	return c.Status(fiber.StatusBadRequest).JSON(HandlerResp{
 		Success: false,
 		Message: err.Error(),

@@ -6,7 +6,8 @@ import (
 	"github.com/Alp4ka/classifier-aaS/pkg/api"
 	"github.com/Alp4ka/mlogger"
 	"github.com/Alp4ka/mlogger/field"
-	uuid "github.com/google/uuid"
+	"github.com/google/uuid"
+	"github.com/guregu/null/v5"
 	"io"
 	"sync"
 )
@@ -24,6 +25,9 @@ func (s *Server) Process(src api.GWManagerService_ProcessServer) (err error) {
 		sessionID     uuid.UUID
 	)
 	for {
+		// TODO: Metrics.
+
+		// Reading request.
 		req, err := src.Recv()
 		if err == io.EOF {
 			mlogger.L(ctx).Info("Client closed connection")
@@ -31,6 +35,8 @@ func (s *Server) Process(src api.GWManagerService_ProcessServer) (err error) {
 		} else if err != nil {
 			return fmt.Errorf("failed to receive client request: %w", err)
 		}
+
+		// Configure ctx.
 		ctx = field.WithContextFields(ctx, field.String("id", req.GetSessionId()), field.String("req", req.GetRequestData()))
 		mlogger.L(ctx).Info("Handle client request")
 
@@ -45,13 +51,17 @@ func (s *Server) Process(src api.GWManagerService_ProcessServer) (err error) {
 		}
 
 		// Getting session.
-		sess, err := s.contextService.GetSession(ctx, &contextcomponent.GetSessionParams{SessionID: sessionID})
+		sess, err := s.contextService.GetSession(ctx, &contextcomponent.GetSessionParams{
+			SessionID: uuid.NullUUID{UUID: sessionID, Valid: true},
+			Active:    null.BoolFrom(true),
+		})
 		if err != nil {
-			return fmt.Errorf("failed to acquire session: %w", err)
+			return fmt.Errorf("failed to get session: %w", err)
 		}
 
-		// Handle request.
+		// TODO: Handle request.
 
+		// Sending response.
 		ret := &api.ProcessResponse{}
 		*ret.ResponseData = sess.Model.ID.String()
 		err = src.Send(ret)

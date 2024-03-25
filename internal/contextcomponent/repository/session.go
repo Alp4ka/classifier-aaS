@@ -17,7 +17,7 @@ type Session struct {
 	State      SessionState `json:"state" db:"state"`
 	Agent      string       `json:"agent" db:"agent" goqu:"skipupdate"`
 	Gateway    string       `json:"gateway" db:"gateway" goqu:"skipupdate"`
-	ValidUntil time.Time    `json:"validUntil" db:"valid_until" goqu:"skipupdate"` // TODO(Gorkovets Roman): logic for deletion invalid.
+	ValidUntil time.Time    `json:"validUntil" db:"valid_until" goqu:"skipupdate"`
 	ClosedAt   null.Time    `json:"closedAt" db:"closed_at"`
 
 	SchemaVariantID uuid.UUID `json:"schemaVariantID" db:"schema_variant_id" goqu:"skipupdate"`
@@ -46,6 +46,8 @@ func (cs *SessionState) Scan(value interface{}) error {
 	if _, isAvailable := _availableSessionStates[SessionState(valueStr)]; !isAvailable {
 		return fmt.Errorf("unknown session state '%s'", value.(string))
 	}
+
+	*cs = SessionState(valueStr)
 	return nil
 }
 

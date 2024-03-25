@@ -4,13 +4,12 @@ import (
 	"context"
 	"github.com/Alp4ka/classifier-aaS/internal/storage"
 	sqlpkg "github.com/Alp4ka/classifier-aaS/pkg/sql"
-	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
 
 type SessionRepository interface {
 	CreateSession(ctx context.Context, dbtx sqlpkg.DBTx, session Session) (*Session, error)
-	GetSession(ctx context.Context, dbtx sqlpkg.DBTx, id uuid.UUID) (*Session, error)
+	GetSession(ctx context.Context, dbtx sqlpkg.DBTx, filter *GetSessionFilter) (*Session, error)
 	UpdateSession(ctx context.Context, tx sqlpkg.Tx, session Session) (*Session, error)
 }
 

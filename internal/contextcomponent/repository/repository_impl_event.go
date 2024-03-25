@@ -11,8 +11,8 @@ import (
 func (r *repositoryImpl) CreateEvent(ctx context.Context, dbtx sqlpkg.DBTx, event Event) (*Event, error) {
 	const fn = "repositoryImpl.CreateEvent"
 
-	event.CreatedAt = timepkg.TimeNow()
-	event.UpdatedAt = timepkg.TimeNow()
+	event.CreatedAt = timepkg.Now()
+	event.UpdatedAt = timepkg.Now()
 
 	query, _, err := goqu.Insert(tbl_Event).Rows(event).Returning(tbl_Event.All()).ToSQL()
 	if err != nil {
