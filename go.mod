@@ -1,10 +1,11 @@
 module github.com/Alp4ka/classifier-aaS
 
-go 1.21.4
+go 1.21.8
 
-toolchain go1.21.8
+replace github.com/Alp4ka/classifier-aaS/pkg/api => ./pkg/api
 
 require (
+	github.com/Alp4ka/classifier-aaS/pkg/api v0.0.0-00010101000000-000000000000
 	github.com/Alp4ka/mlogger v1.0.14
 	github.com/ansrivas/fiberprometheus/v2 v2.6.1
 	github.com/caarlos0/env v3.5.0+incompatible
@@ -12,11 +13,13 @@ require (
 	github.com/gofiber/contrib/swagger v1.1.1
 	github.com/gofiber/fiber/v2 v2.52.2
 	github.com/google/uuid v1.6.0
+	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
 	github.com/guregu/null/v5 v5.0.0
 	github.com/j2gg0s/otsql v0.18.0
 	github.com/jackc/pgx/v5 v5.5.5
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/stretchr/testify v1.9.0
+	google.golang.org/grpc v1.62.1
 )
 
 require (
@@ -71,12 +74,12 @@ require (
 	go.opentelemetry.io/otel/metric v1.20.0 // indirect
 	go.opentelemetry.io/otel/trace v1.20.0 // indirect
 	golang.org/x/crypto v0.19.0 // indirect
+	golang.org/x/net v0.20.0 // indirect
 	golang.org/x/sync v0.6.0 // indirect
 	golang.org/x/sys v0.17.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20231106174013-bbf56f31fb17 // indirect
-	google.golang.org/grpc v1.59.0 // indirect
-	google.golang.org/protobuf v1.31.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240123012728-ef4313101c80 // indirect
+	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

@@ -14,8 +14,8 @@ import (
 )
 
 type GetSchemaFilter struct {
-	ID      uuid.NullUUID
-	Gateway null.String
+	ID     uuid.NullUUID
+	Latest null.Bool
 }
 
 func (f *GetSchemaFilter) toDataset() *goqu.SelectDataset {
@@ -26,10 +26,11 @@ func (f *GetSchemaFilter) toDataset() *goqu.SelectDataset {
 	}
 
 	if f.ID.Valid {
-		query = query.Where(col_Schema_ID.Eq(f.ID.UUID))
+		query = query.Where(tbl_Schema.Col("id").Eq(f.ID.UUID))
 	}
-	if f.Gateway.Valid {
-		query = query.Where(col_Schema_Gateway.Eq(f.Gateway.String))
+
+	if f.Latest.Valid {
+		query = query.Order(tbl_Schema.Col("created_at").Desc()).Limit(1)
 	}
 
 	return query

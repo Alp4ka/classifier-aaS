@@ -7,12 +7,7 @@ import (
 	"time"
 )
 
-var (
-	tbl_SchemaVariant = goqu.T("schema_variant")
-
-	col_SchemaVariant_ID          = tbl_SchemaVariant.Col("id")
-	col_SchemaVariant_RefSchemaID = tbl_SchemaVariant.Col("ref_schema_id")
-)
+var tbl_SchemaVariant = goqu.T("schema_variant")
 
 type SchemaVariant struct {
 	ID          uuid.UUID          `db:"id" goqu:"skipupdate"`

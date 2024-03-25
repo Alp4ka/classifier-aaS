@@ -1,4 +1,4 @@
-package api
+package http
 
 import (
 	"github.com/Alp4ka/classifier-aaS/internal/schemacomponent"
@@ -11,7 +11,7 @@ import (
 type hCreateSchemaReq struct {
 }
 
-func (s *HTTPServer) hCreateSchema(c *fiber.Ctx) error {
+func (s *Server) hCreateSchema(c *fiber.Ctx) error {
 	ctx := c.UserContext()
 
 	req := new(hCreateSchemaReq)
@@ -35,4 +35,4 @@ func (s *HTTPServer) hCreateSchema(c *fiber.Ctx) error {
 		)
 }
 
-var _ fiber.Handler = (*HTTPServer)(nil).hCreateSchema
+var _ fiber.Handler = (*Server)(nil).hCreateSchema

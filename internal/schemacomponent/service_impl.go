@@ -9,6 +9,7 @@ import (
 	"github.com/Alp4ka/classifier-aaS/internal/storage"
 	sqlpkg "github.com/Alp4ka/classifier-aaS/pkg/sql"
 	"github.com/google/uuid"
+	"github.com/guregu/null/v5"
 )
 
 type Config struct {
@@ -26,7 +27,8 @@ func NewService(cfg Config) Service {
 }
 
 type GetSchemaFilter struct {
-	ID uuid.NullUUID
+	ID     uuid.NullUUID
+	Latest null.Bool
 }
 
 func (s *serviceImpl) GetSchema(ctx context.Context, filter *GetSchemaFilter) (*schema.Schema, error) {
@@ -35,7 +37,8 @@ func (s *serviceImpl) GetSchema(ctx context.Context, filter *GetSchemaFilter) (*
 		func(ctx context.Context, tx sqlpkg.Tx) error {
 			schemaRecord, err := s.repo.GetSchema(ctx, tx,
 				&repository.GetSchemaFilter{
-					ID: filter.ID,
+					ID:     filter.ID,
+					Latest: filter.Latest,
 				},
 			)
 			if err != nil {
@@ -196,6 +199,27 @@ func (s *serviceImpl) UpdateSchema(ctx context.Context, params *UpdateSchemaPara
 	}
 
 	return ret, nil
+}
+
+func (s *serviceImpl) GetSchemaVariant(ctx context.Context, id uuid.UUID) (*schema.Variant, error) {
+	schemaVariantRecord, err := s.repo.GetSchemaVariant(ctx, s.repo.DB(),
+		&repository.GetSchemaVariantFilter{
+			ID: uuid.NullUUID{UUID: id, Valid: true},
+		},
+	)
+	if err != nil {
+		if errors.Is(err, storage.ErrEntityNotFound) {
+			return nil, ErrVariantNotFound
+		}
+		return nil, err
+	}
+
+	return &schema.Variant{
+		ID:          schemaVariantRecord.ID,
+		Description: schemaVariantRecord.Description,
+		CreatedAt:   schemaVariantRecord.CreatedAt,
+		UpdatedAt:   schemaVariantRecord.UpdatedAt,
+	}, nil
 }
 
 var _ Service = (*serviceImpl)(nil)

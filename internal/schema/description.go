@@ -8,6 +8,17 @@ import (
 
 const MaxNodesCount = 12
 
+type Tree map[NodeID]Node
+
+func (t Tree) GetStart() (Node, error) {
+	for _, node := range t {
+		if node.GetType() == NodeTypeStart {
+			return node, nil
+		}
+	}
+	return nil, fmt.Errorf("start node not found")
+}
+
 type Description struct {
 	nodes []*BaseNode
 }
@@ -40,7 +51,7 @@ func (d Description) Value() (driver.Value, error) {
 	return d.MarshalJSON()
 }
 
-func (d *Description) MapAndValidate() (map[NodeID]Node, error) {
+func (d *Description) MapAndValidate() (Tree, error) {
 	// Validate.
 	if len(d.nodes) > MaxNodesCount {
 		return nil, fmt.Errorf("too many nodes, max is %d, actual is %d", MaxNodesCount, len(d.nodes))
@@ -54,7 +65,7 @@ func (d *Description) MapAndValidate() (map[NodeID]Node, error) {
 		cntStartNodes  int
 		cntFinishNodes int
 	)
-	mapping := make(map[NodeID]Node)
+	mapping := make(Tree)
 	for _, node := range d.nodes {
 		if node == nil {
 			return nil, fmt.Errorf("node is nil")
@@ -119,6 +130,20 @@ func (d *Description) MapAndValidate() (map[NodeID]Node, error) {
 	}
 	if cntFinishNodes != 1 {
 		return nil, fmt.Errorf("no finish node")
+	}
+
+	return mapping, nil
+}
+
+func (d *Description) Map() (Tree, error) {
+	mapping := make(Tree)
+	for _, node := range d.nodes {
+		tmpNode, err := FromNode(node)
+		if err != nil {
+			return nil, fmt.Errorf("node %s %w", tmpNode.GetID(), err)
+		}
+
+		mapping[node.ID] = tmpNode
 	}
 
 	return mapping, nil

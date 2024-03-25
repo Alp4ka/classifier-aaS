@@ -1,4 +1,4 @@
-package api
+package http
 
 import (
 	"github.com/gofiber/fiber/v2"
@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func (s *HTTPServer) mwRateLimiter() fiber.Handler {
+func (s *Server) mwRateLimiter() fiber.Handler {
 	return limiter.New(limiter.Config{
 		Max:        s.rateLimit,
 		Expiration: 30 * time.Second,

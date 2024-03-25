@@ -10,49 +10,26 @@ import (
 	timepkg "github.com/Alp4ka/classifier-aaS/pkg/time"
 	"github.com/doug-martin/goqu/v9"
 	"github.com/google/uuid"
-	"time"
 )
 
-type GetSessionFilter struct {
-	ID          uuid.UUID
-	CurrentTime time.Time
-	States      []SessionState
-}
-
-func (f *GetSessionFilter) toDataset() *goqu.SelectDataset {
-	if f == nil {
-		return nil
-	}
-
-	query := goqu.
-		From(tbl_Session).
-		Where(col_Session_ID.Eq(f.ID)).
-		Where(col_Session_ValidUntil.Gte(f.CurrentTime))
-	if f.States != nil {
-		query = query.Where(col_Session_State.In(f.States))
-	}
-
-	return query
-}
-
-func (r *repositoryImpl) GetSession(ctx context.Context, dbtx sqlpkg.DBTx, filter *GetSessionFilter) (*Session, error) {
+func (r *repositoryImpl) GetSession(ctx context.Context, dbtx sqlpkg.DBTx, id uuid.UUID) (*Session, error) {
 	const fn = "repositoryImpl.GetSession"
 
-	query, _, err := filter.toDataset().ToSQL()
+	query, _, err := goqu.From(tbl_Session).Where(tbl_Session.Col("id").Eq(id)).ToSQL()
 	if err != nil {
 		panic(err)
 	}
 
-	var session Session
-	err = dbtx.GetContext(ctx, &session, query)
+	var ret Session
+	err = dbtx.GetContext(ctx, &ret, query)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errors.Join(storage.ErrEntityNotFound, err)
+			return nil, errors.Join(err, storage.ErrEntityNotFound)
 		}
 		return nil, fmt.Errorf("%s: %w", fn, err)
 	}
 
-	return &session, nil
+	return &ret, nil
 }
 
 func (r *repositoryImpl) CreateSession(ctx context.Context, dbtx sqlpkg.DBTx, session Session) (*Session, error) {
@@ -62,7 +39,7 @@ func (r *repositoryImpl) CreateSession(ctx context.Context, dbtx sqlpkg.DBTx, se
 	session.CreatedAt = timeNow
 	session.UpdatedAt = timeNow
 
-	query, _, err := goqu.Insert(tbl_Session).Rows(session).Returning(tbl_Session.All()).ToSQL()
+	query, _, err := goqu.Insert(tbl_Session).Rows(session).OnConflict(goqu.DoNothing()).Returning(tbl_Session.All()).ToSQL()
 	if err != nil {
 		panic(err)
 	}

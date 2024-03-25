@@ -6,16 +6,11 @@ import (
 	"fmt"
 	"github.com/doug-martin/goqu/v9"
 	"github.com/google/uuid"
+	"github.com/guregu/null/v5"
 	"time"
 )
 
-var (
-	tbl_Session = goqu.T("session")
-
-	col_Session_ID         = tbl_Session.Col("id")
-	col_Session_ValidUntil = tbl_Session.Col("valid_until")
-	col_Session_State      = tbl_Session.Col("state")
-)
+var tbl_Session = goqu.T("session")
 
 type Session struct {
 	ID         uuid.UUID    `json:"id" db:"id" goqu:"skipupdate"`
@@ -23,9 +18,13 @@ type Session struct {
 	Agent      string       `json:"agent" db:"agent" goqu:"skipupdate"`
 	Gateway    string       `json:"gateway" db:"gateway" goqu:"skipupdate"`
 	ValidUntil time.Time    `json:"validUntil" db:"valid_until" goqu:"skipupdate"` // TODO(Gorkovets Roman): logic for deletion invalid.
-	ClosedAt   time.Time    `json:"closedAt" db:"closed_at"`
-	CreatedAt  time.Time    `json:"createdAt" db:"created_at" goqu:"skipupdate"`
-	UpdatedAt  time.Time    `json:"updatedAt" db:"updated_at"`
+	ClosedAt   null.Time    `json:"closedAt" db:"closed_at"`
+
+	SchemaVariantID uuid.UUID `json:"schemaVariantID" db:"schema_variant_id" goqu:"skipupdate"`
+	SchemaNodeID    uuid.UUID `json:"schemaNodeID" db:"schema_node_id"`
+
+	CreatedAt time.Time `json:"createdAt" db:"created_at" goqu:"skipupdate"`
+	UpdatedAt time.Time `json:"updatedAt" db:"updated_at"`
 }
 
 type SessionState string

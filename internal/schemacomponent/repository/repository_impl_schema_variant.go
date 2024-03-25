@@ -13,8 +13,7 @@ import (
 )
 
 type GetSchemaVariantFilter struct {
-	ID       uuid.NullUUID
-	SchemaID uuid.NullUUID
+	ID uuid.NullUUID
 }
 
 func (f *GetSchemaVariantFilter) toDataset() *goqu.SelectDataset {
@@ -25,10 +24,7 @@ func (f *GetSchemaVariantFilter) toDataset() *goqu.SelectDataset {
 	}
 
 	if f.ID.Valid {
-		query = query.Where(col_SchemaVariant_ID.Eq(f.ID.UUID))
-	}
-	if f.SchemaID.Valid {
-		query = query.Where(col_SchemaVariant_RefSchemaID.Eq(f.SchemaID.UUID))
+		query = query.Where(tbl_SchemaVariant.Col("id").Eq(f.ID.UUID))
 	}
 
 	return query

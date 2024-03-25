@@ -1,4 +1,4 @@
-package api
+package http
 
 import (
 	"github.com/Alp4ka/mlogger"
@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func (s *HTTPServer) mwLogging() fiber.Handler {
+func (s *Server) mwLogging() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		rid, _ := c.Locals(requestid.ConfigDefault.ContextKey).(string)
 

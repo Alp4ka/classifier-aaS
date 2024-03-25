@@ -1,8 +1,7 @@
-package api
+package http
 
 import (
 	"fmt"
-	"github.com/Alp4ka/classifier-aaS/internal/contextcomponent"
 	"github.com/Alp4ka/classifier-aaS/internal/schemacomponent"
 	globaltelemtry "github.com/Alp4ka/classifier-aaS/internal/telemetry"
 	"github.com/Alp4ka/mlogger"
@@ -15,20 +14,18 @@ const (
 	_appName = "http-api"
 )
 
-type HTTPServer struct {
-	app            *fiber.App
-	schemaService  schemacomponent.Service
-	contextService contextcomponent.Service
-	port           int
-	rateLimit      int
+type Server struct {
+	app           *fiber.App
+	schemaService schemacomponent.Service
+	port          int
+	rateLimit     int
 }
 
-func NewHTTPServer(cfg Config) *HTTPServer {
-	server := &HTTPServer{
-		contextService: cfg.ContextService,
-		schemaService:  cfg.SchemaService,
-		port:           cfg.Port,
-		rateLimit:      cfg.RateLimit,
+func NewHTTPServer(cfg Config) *Server {
+	server := &Server{
+		schemaService: cfg.SchemaService,
+		port:          cfg.Port,
+		rateLimit:     cfg.RateLimit,
 	}
 	server.app = fiber.New(
 		fiber.Config{
@@ -42,7 +39,7 @@ func NewHTTPServer(cfg Config) *HTTPServer {
 	return server
 }
 
-func (s *HTTPServer) configureRouting() {
+func (s *Server) configureRouting() {
 	// Middlewares.
 	s.app.Use(s.mwRecoverer())
 	s.app.Use(s.mwCors())
@@ -62,18 +59,18 @@ func (s *HTTPServer) configureRouting() {
 	schemaGroup.Put("", s.hUpdateSchema)
 }
 
-func (s *HTTPServer) Run() error {
+func (s *Server) Run() error {
 	s.configureRouting()
-	mlogger.L().Info("Listening API server", field.Int("port", s.port))
+	mlogger.L().Info("Listening HTTP API server", field.Int("port", s.port))
 	return s.app.Listen(fmt.Sprintf(":%d", s.port))
 }
 
-func (s *HTTPServer) WithMetrics() *HTTPServer {
+func (s *Server) WithMetrics() *Server {
 	prometheus := fiberprometheus.New(globaltelemtry.Namespace)
 	prometheus.RegisterAt(s.app, "/metrics")
 	return s
 }
 
-func (s *HTTPServer) Close() error {
+func (s *Server) Close() error {
 	return s.app.Shutdown()
 }

@@ -8,20 +8,22 @@ import (
 	"github.com/doug-martin/goqu/v9"
 )
 
-func (r *repositoryImpl) CreateEvent(ctx context.Context, dbtx sqlpkg.DBTx, event Event) error {
+func (r *repositoryImpl) CreateEvent(ctx context.Context, dbtx sqlpkg.DBTx, event Event) (*Event, error) {
 	const fn = "repositoryImpl.CreateEvent"
 
 	event.CreatedAt = timepkg.TimeNow()
+	event.UpdatedAt = timepkg.TimeNow()
 
-	query, _, err := goqu.Insert(tbl_Event).Rows(event).ToSQL()
+	query, _, err := goqu.Insert(tbl_Event).Rows(event).Returning(tbl_Event.All()).ToSQL()
 	if err != nil {
 		panic(err)
 	}
 
-	_, err = dbtx.ExecContext(ctx, query)
+	var ret Event
+	err = dbtx.GetContext(ctx, &ret, query)
 	if err != nil {
-		return fmt.Errorf("%s: %w", fn, err)
+		return nil, fmt.Errorf("%s: %w", fn, err)
 	}
 
-	return nil
+	return &ret, nil
 }

@@ -3,7 +3,8 @@ package app
 import (
 	"context"
 	"errors"
-	"github.com/Alp4ka/classifier-aaS/internal/api"
+	"github.com/Alp4ka/classifier-aaS/internal/api/grpc"
+	"github.com/Alp4ka/classifier-aaS/internal/api/http"
 	"github.com/Alp4ka/classifier-aaS/internal/contextcomponent"
 	contextrepository "github.com/Alp4ka/classifier-aaS/internal/contextcomponent/repository"
 	"github.com/Alp4ka/classifier-aaS/internal/schemacomponent"
@@ -13,46 +14,61 @@ import (
 type App struct {
 	cfg Config
 
-	httpServer *api.HTTPServer
+	httpServer *http.Server
+	grpcServer *grpc.Server
 }
 
 func New(cfg Config) *App {
+	schemaService := schemacomponent.NewService(
+		schemacomponent.Config{
+			Repository: schemarepository.NewRepository(cfg.DB),
+		},
+	)
+
+	contextService := contextcomponent.NewService(
+		contextcomponent.Config{
+			SchemaService: schemaService,
+			Repository:    contextrepository.NewRepository(cfg.DB),
+		},
+	)
+
 	return &App{
 		cfg: cfg,
-		httpServer: api.NewHTTPServer(
-			api.Config{
-				RateLimit: cfg.HTTPRateLimit,
-				Port:      cfg.HTTPPort,
-				ContextService: contextcomponent.NewService(
-					contextcomponent.Config{
-						Repository: contextrepository.NewRepository(cfg.DB),
-					},
-				),
-				SchemaService: schemacomponent.NewService(
-					schemacomponent.Config{
-						Repository: schemarepository.NewRepository(cfg.DB),
-					},
-				),
+		httpServer: http.NewHTTPServer(
+			http.Config{
+				RateLimit:     cfg.HTTPRateLimit,
+				Port:          cfg.HTTPPort,
+				SchemaService: schemaService,
 			},
 		).WithMetrics(),
+		grpcServer: grpc.New(
+			grpc.Config{
+				ContextService: contextService,
+				Port:           cfg.GRPCPort,
+			},
+		),
 	}
 }
 
 func (a *App) Run(ctx context.Context) error {
-	errCh := make(chan error, 1)
+	errCh := make(chan error, 2)
 
 	go func(errCh chan<- error) {
 		errCh <- a.httpServer.Run()
 	}(errCh)
 
+	go func(errCh chan<- error) {
+		errCh <- a.grpcServer.Run()
+	}(errCh)
+
 	select {
 	case <-ctx.Done():
-		return errors.Join(ctx.Err(), a.httpServer.Close())
+		return nil
 	case err := <-errCh:
 		return err
 	}
 }
 
 func (a *App) Close() (err error) {
-	return errors.Join(err, a.httpServer.Close(), a.cfg.DB.Close())
+	return errors.Join(a.httpServer.Close(), a.grpcServer.Close(), a.cfg.DB.Close())
 }

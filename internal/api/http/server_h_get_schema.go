@@ -7,7 +7,7 @@
 //	@Failure		500			{object}	HandlerResp	"Внутренняя ошибка сервиса"
 //	@Router			/api/schema/{id}  [get]
 
-package api
+package http
 
 import (
 	"errors"
@@ -18,7 +18,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (s *HTTPServer) hGetActualSchema(c *fiber.Ctx) error {
+func (s *Server) hGetActualSchema(c *fiber.Ctx) error {
 	ctx := c.UserContext()
 
 	id, err := uuid.Parse(c.Params("id"))
@@ -51,4 +51,4 @@ func (s *HTTPServer) hGetActualSchema(c *fiber.Ctx) error {
 		)
 }
 
-var _ fiber.Handler = (*HTTPServer)(nil).hGetActualSchema
+var _ fiber.Handler = (*Server)(nil).hGetActualSchema

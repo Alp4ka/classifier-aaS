@@ -1,4 +1,4 @@
-package api
+package http
 
 import "github.com/gofiber/fiber/v2"
 
@@ -8,7 +8,7 @@ type HandlerResp struct {
 	Message string `json:"message,omitempty"`
 }
 
-func (s *HTTPServer) mwErrorHandler(c *fiber.Ctx, err error) error {
+func (s *Server) mwErrorHandler(c *fiber.Ctx, err error) error {
 	// TODO(Gorkovets Roman): User friendly error handling.
 
 	return c.Status(fiber.StatusBadRequest).JSON(HandlerResp{
@@ -17,4 +17,4 @@ func (s *HTTPServer) mwErrorHandler(c *fiber.Ctx, err error) error {
 	})
 }
 
-var _ fiber.ErrorHandler = (*HTTPServer)(nil).mwErrorHandler
+var _ fiber.ErrorHandler = (*Server)(nil).mwErrorHandler

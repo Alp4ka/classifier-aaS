@@ -17,6 +17,9 @@ type Config struct {
 	// HTTP API.
 	HTTPPort  int `env:"HTTP_PORT" envDefault:"1111"`
 	RateLimit int `env:"HTTP_RATE_LIMIT" envDefault:"10"`
+
+	// GRPC API.
+	GRPCPort int `env:"GRPC_PORT" envDefault:"1112"`
 }
 
 func FromEnv() (*Config, error) {

@@ -88,6 +88,7 @@ func setupApp(env *environment) {
 			OpenAIAPIKey:  env.cfg.OpenAIAPIKey,
 			HTTPPort:      env.cfg.HTTPPort,
 			HTTPRateLimit: env.cfg.RateLimit,
+			GRPCPort:      env.cfg.GRPCPort,
 		},
 	)
 }

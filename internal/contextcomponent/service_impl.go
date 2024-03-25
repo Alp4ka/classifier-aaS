@@ -10,14 +10,16 @@ import (
 	sqlpkg "github.com/Alp4ka/classifier-aaS/pkg/sql"
 	timepkg "github.com/Alp4ka/classifier-aaS/pkg/time"
 	"github.com/google/uuid"
+	"github.com/guregu/null/v5"
 	"time"
 )
 
-const DefaultSessionLifetime time.Duration = time.Hour
+const DefaultSessionLifetime = time.Hour
 
 type Config struct {
-	Repository   repository.Repository
-	OpenAIAPIKey string
+	SchemaService schemacomponent.Service
+	Repository    repository.Repository
+	OpenAIAPIKey  string
 }
 
 type serviceImpl struct {
@@ -28,12 +30,13 @@ type serviceImpl struct {
 
 func NewService(cfg Config) Service {
 	return &serviceImpl{
-		repo: cfg.Repository,
+		repo:          cfg.Repository,
+		schemaService: cfg.SchemaService,
 	}
 }
 
-func (s *serviceImpl) closeSession(ctx context.Context, sessionID uuid.UUID) error {
-	const fn = "serviceImpl.closeSession"
+func (s *serviceImpl) ReleaseSession(ctx context.Context, sessionID uuid.UUID) error {
+	const fn = "serviceImpl.ReleaseSession"
 
 	err := s.repo.WithTransaction(
 		ctx,
@@ -56,6 +59,105 @@ func (s *serviceImpl) closeSession(ctx context.Context, sessionID uuid.UUID) err
 	return nil
 }
 
+type GetSessionParams struct {
+	SessionID uuid.UUID
+}
+
+func (s *serviceImpl) GetSession(ctx context.Context, params *GetSessionParams) (*Session, error) {
+	const fn = "serviceImpl.GetSession"
+
+	var session *Session
+	err := s.repo.WithTransaction(
+		ctx,
+		func(ctx context.Context, tx sqlpkg.Tx) error {
+			sessionRecord, err := s.repo.GetSession(ctx, tx, params.SessionID)
+			if err != nil {
+				if errors.Is(err, storage.ErrEntityNotFound) {
+					return ErrSessionDoesNotExist
+				}
+				return err
+			} else if sessionRecord.ValidUntil.Before(time.Now()) {
+				return ErrSessionExpired
+			}
+
+			schemaVariantRecord, err := s.schemaService.GetSchemaVariant(ctx, sessionRecord.SchemaVariantID)
+			if err != nil {
+				if errors.Is(err, storage.ErrEntityNotFound) {
+					return ErrNoActualVariant
+				}
+				return err
+			}
+
+			tree, err := schemaVariantRecord.Description.Map()
+			if err != nil {
+				return err
+			}
+
+			session = &Session{sessionRecord, tree}
+			return nil
+		},
+	)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", fn, err)
+	}
+
+	return session, nil
+}
+
+type CreateSessionParams struct {
+	SessionID uuid.UUID
+	Agent     string
+	Gateway   string
+}
+
+func (s *serviceImpl) CreateSession(ctx context.Context, params *CreateSessionParams) (*Session, error) {
+	const fn = "serviceImpl.CreateSession"
+
+	var session *Session
+	err := s.repo.WithTransaction(
+		ctx,
+		func(ctx context.Context, tx sqlpkg.Tx) error {
+			recentSchema, err := s.schemaService.GetSchema(ctx, &schemacomponent.GetSchemaFilter{Latest: null.BoolFrom(true)})
+			if err != nil {
+				return err
+			} else if recentSchema.ActualVariant == nil {
+				return ErrNoActualVariant
+			}
+
+			tree, err := recentSchema.ActualVariant.Description.Map()
+			if err != nil {
+				return err
+			}
+			startNode, err := tree.GetStart()
+			if err != nil {
+				return err
+			}
+
+			sessionRecord, err := s.repo.CreateSession(ctx, tx, repository.Session{
+				ID:              params.SessionID,
+				State:           repository.SessionStateActive,
+				Agent:           params.Agent,
+				Gateway:         params.Gateway,
+				ValidUntil:      timepkg.TimeNow().Add(DefaultSessionLifetime),
+				ClosedAt:        null.TimeFromPtr(nil),
+				SchemaVariantID: recentSchema.ActualVariant.ID,
+				SchemaNodeID:    startNode.GetID(),
+			})
+			if err != nil {
+				return err
+			}
+
+			session = &Session{sessionRecord, tree}
+			return nil
+		},
+	)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", fn, err)
+	}
+
+	return session, nil
+}
+
 type AcquireSessionParams struct {
 	SessionID uuid.UUID
 	Agent     string
@@ -64,49 +166,19 @@ type AcquireSessionParams struct {
 
 func (s *serviceImpl) AcquireSession(ctx context.Context, params *AcquireSessionParams) (*Session, error) {
 	const fn = "serviceImpl.AcquireSession"
-	if params == nil {
-		panic("how the fuck did you get here?")
+
+	session, err := s.GetSession(ctx, &GetSessionParams{SessionID: params.SessionID})
+	if err == nil {
+		return session, nil
+	} else if !errors.Is(err, ErrSessionExpired) && !errors.Is(err, ErrSessionDoesNotExist) {
+		return nil, fmt.Errorf("%s: %w", fn, err)
 	}
 
-	var session *Session
-	err := s.repo.WithTransaction(
-		ctx,
-		func(ctx context.Context, tx sqlpkg.Tx) error {
-			sessionRecord, err := s.repo.GetSession(
-				ctx,
-				s.repo.DB(),
-				&repository.GetSessionFilter{
-					ID:          params.SessionID,
-					CurrentTime: timepkg.TimeNow(),
-				},
-			)
-			if err != nil {
-				if !errors.Is(err, storage.ErrEntityNotFound) {
-					return err
-				}
-
-				sessionRecord = &repository.Session{
-					ID:         params.SessionID,
-					State:      repository.SessionStateActive,
-					Agent:      params.Agent,
-					Gateway:    params.Gateway,
-					ValidUntil: timepkg.TimeNow().Add(DefaultSessionLifetime),
-				}
-				_, err = s.repo.CreateSession(ctx, s.repo.DB(), *sessionRecord)
-				if err != nil {
-					return err
-				}
-			}
-
-			session = NewSession(
-				sessionRecord,
-				func(ctx context.Context) error {
-					return s.closeSession(ctx, sessionRecord.ID)
-				},
-			)
-			return nil
-		},
-	)
+	session, err = s.CreateSession(ctx, &CreateSessionParams{
+		SessionID: params.SessionID,
+		Agent:     params.Agent,
+		Gateway:   params.Gateway,
+	})
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", fn, err)
 	}
@@ -125,9 +197,6 @@ type Response struct {
 }
 
 func (s *serviceImpl) Handle(ctx context.Context, session *Session, req *Request) (*Response, error) {
-	if req == nil {
-		panic("how the fuck did you get here?")
-	}
 	panic("not implemented")
 
 	// Load schema if not presented.

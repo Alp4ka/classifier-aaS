@@ -1,4 +1,4 @@
-package api
+package http
 
 import (
 	"errors"
@@ -15,7 +15,7 @@ type hUpdateSchemaReq struct {
 	Description *schema.Description `json:"description"`
 }
 
-func (s *HTTPServer) hUpdateSchema(c *fiber.Ctx) error {
+func (s *Server) hUpdateSchema(c *fiber.Ctx) error {
 	ctx := c.UserContext()
 
 	req := new(hUpdateSchemaReq)
@@ -47,4 +47,4 @@ func (s *HTTPServer) hUpdateSchema(c *fiber.Ctx) error {
 		)
 }
 
-var _ fiber.Handler = (*HTTPServer)(nil).hUpdateSchema
+var _ fiber.Handler = (*Server)(nil).hUpdateSchema
