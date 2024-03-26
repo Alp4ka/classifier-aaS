@@ -1,11 +1,26 @@
 package schema
 
+import "fmt"
+
 type NodeListen struct {
-	BaseNode
+	baseNode
 }
 
-func (n *NodeListen) FromNode(node Node) error {
-	return n.BaseNode.FromNode(node)
+func (n *NodeListen) fromNode(node Node) error {
+	const fn = "NodeListen.fromNode"
+	err := n.baseNode.fromNode(node)
+	if err != nil {
+		return fmt.Errorf("%s: %w", fn, err)
+	}
+	return nil
+}
+
+func (n *NodeListen) InputType() NodeDataType {
+	return DataTypeString
+}
+
+func (n *NodeListen) OutputType() NodeDataType {
+	return DataTypeString
 }
 
 var _ Node = (*NodeListen)(nil)

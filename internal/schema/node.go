@@ -29,25 +29,9 @@ const (
 	NodeTypeExternalRequest NodeType = "external_request"
 )
 
-// NOTE: Does not supposed to be changed in runtime.
-var _nodeTypeToInputType = map[NodeType]NodeDataType{
-	NodeTypeListen:          DataTypeString,
-	NodeTypeRespond:         DataTypeString,
-	NodeTypeClassify:        DataTypeJSON,
-	NodeTypeExternalRequest: DataTypeString,
-}
-
-// NOTE: Does not supposed to be changed in runtime.
-var _nodeTypeToOutputType = map[NodeType]NodeDataType{
-	NodeTypeListen:          DataTypeString,
-	NodeTypeRespond:         DataTypeString,
-	NodeTypeClassify:        DataTypeString,
-	NodeTypeExternalRequest: DataTypeString,
-}
-
 type Node interface {
 	mustEmbedBaseNode()
-	FromNode(Node) error
+	fromNode(Node) error
 	Validate() error
 	InputType() NodeDataType
 	OutputType() NodeDataType
@@ -60,7 +44,7 @@ type Node interface {
 	GetGridData() map[string]any
 }
 
-type BaseNode struct {
+type baseNode struct {
 	ID          NodeID         `json:"id"`
 	Type        NodeType       `json:"type"`
 	NextID      uuid.NullUUID  `json:"nextID"`
@@ -69,9 +53,9 @@ type BaseNode struct {
 	GridData    map[string]any `json:"gridData"`
 }
 
-func (n *BaseNode) mustEmbedBaseNode() {}
+func (n *baseNode) mustEmbedBaseNode() {}
 
-func (n *BaseNode) FromNode(node Node) error {
+func (n *baseNode) fromNode(node Node) error {
 	n.ID = node.GetID()
 	n.Type = node.GetType()
 	n.NextID = node.GetNextID()
@@ -81,43 +65,43 @@ func (n *BaseNode) FromNode(node Node) error {
 	return nil
 }
 
-func (n *BaseNode) Validate() error {
+func (n *baseNode) Validate() error {
 	return nil
 }
 
-func (n *BaseNode) InputType() NodeDataType {
-	return _nodeTypeToInputType[n.Type]
+func (n *baseNode) InputType() NodeDataType {
+	panic("implement me")
 }
 
-func (n *BaseNode) OutputType() NodeDataType {
-	return _nodeTypeToOutputType[n.Type]
+func (n *baseNode) OutputType() NodeDataType {
+	panic("implement me")
 }
 
-func (n *BaseNode) GetID() NodeID {
+func (n *baseNode) GetID() NodeID {
 	return n.ID
 }
 
-func (n *BaseNode) GetType() NodeType {
+func (n *baseNode) GetType() NodeType {
 	return n.Type
 }
 
-func (n *BaseNode) GetNextErrorID() uuid.NullUUID {
+func (n *baseNode) GetNextErrorID() uuid.NullUUID {
 	return n.NextErrorID
 }
 
-func (n *BaseNode) GetNextID() uuid.NullUUID {
+func (n *baseNode) GetNextID() uuid.NullUUID {
 	return n.NextID
 }
 
-func (n *BaseNode) GetData() map[string]any {
+func (n *baseNode) GetData() map[string]any {
 	return n.Data
 }
 
-func (n *BaseNode) GetGridData() map[string]any {
+func (n *baseNode) GetGridData() map[string]any {
 	return n.GridData
 }
 
-var _ Node = (*BaseNode)(nil)
+var _ Node = (*baseNode)(nil)
 
 func FromNode(node Node) (Node, error) {
 	var ret Node
@@ -138,5 +122,5 @@ func FromNode(node Node) (Node, error) {
 		return nil, fmt.Errorf("unknown node type %s", node.GetType())
 	}
 
-	return ret, ret.FromNode(node)
+	return ret, ret.fromNode(node)
 }

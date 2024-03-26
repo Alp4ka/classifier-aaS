@@ -20,11 +20,11 @@ func (t Tree) GetStart() (Node, error) {
 }
 
 type Description struct {
-	nodes []*BaseNode
+	nodes []*baseNode
 }
 
 func (d *Description) UnmarshalJSON(data []byte) error {
-	var nodes []*BaseNode
+	var nodes []*baseNode
 	err := json.Unmarshal(data, &nodes)
 	if err != nil {
 		return err
@@ -77,15 +77,17 @@ func (d *Description) MapAndValidate() (Tree, error) {
 	}
 
 	// Check for fake paths.
-	for k, _ := range mapping {
+	for k := range mapping {
 		// Check if there are to many start/finish nodes.
 		if mapping[k].GetType() == NodeTypeStart {
+			// TODO start cannot be a next node id for any.
 			cntStartNodes++
 			if cntStartNodes > 1 {
 				return nil, fmt.Errorf("too many start nodes")
 			}
 		}
 		if mapping[k].GetType() == NodeTypeFinish {
+			// TODO start cannot have next node.
 			cntFinishNodes++
 			if cntFinishNodes > 1 {
 				return nil, fmt.Errorf("too many finish nodes")
@@ -124,6 +126,20 @@ func (d *Description) MapAndValidate() (Tree, error) {
 
 		mapping[k] = tmpNode
 	}
+
+	for _, cur := range mapping {
+		if cur.GetNextID().Valid {
+			if cur.OutputType() != mapping[cur.GetNextID().UUID].InputType() {
+				return nil, fmt.Errorf("node %s has next node %s which has incompatible input/output types", cur.GetID(), cur.GetNextID().UUID)
+			}
+		}
+
+		if cur.GetNextErrorID().Valid {
+			if cur.OutputType() != mapping[cur.GetNextErrorID().UUID].InputType() {
+				return nil, fmt.Errorf("node %s has next node %s which has incompatible input/output types", cur.GetID(), cur.GetNextID().UUID)
+			}
+		}
+	}
 	// Also a problem if there are to many start/finish nodes.
 	if cntStartNodes != 1 {
 		return nil, fmt.Errorf("no start node")
@@ -140,7 +156,7 @@ func (d *Description) Map() (Tree, error) {
 	for _, node := range d.nodes {
 		tmpNode, err := FromNode(node)
 		if err != nil {
-			return nil, fmt.Errorf("node %s %w", tmpNode.GetID(), err)
+			return nil, fmt.Errorf("node %s %w", node.GetID(), err)
 		}
 
 		mapping[node.ID] = tmpNode

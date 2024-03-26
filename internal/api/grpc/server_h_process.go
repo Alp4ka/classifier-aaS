@@ -1,8 +1,11 @@
 package grpc
 
 import (
+	"errors"
 	"fmt"
 	"github.com/Alp4ka/classifier-aaS/internal/contextcomponent"
+	contextrepository "github.com/Alp4ka/classifier-aaS/internal/contextcomponent/repository"
+	"github.com/Alp4ka/classifier-aaS/internal/processor"
 	"github.com/Alp4ka/classifier-aaS/pkg/api"
 	"github.com/Alp4ka/mlogger"
 	"github.com/Alp4ka/mlogger/field"
@@ -21,8 +24,9 @@ func (s *Server) Process(src api.GWManagerService_ProcessServer) (err error) {
 	}()
 
 	var (
-		sessionIDOnce sync.Once
-		sessionID     uuid.UUID
+		once    sync.Once
+		session *contextcomponent.Session
+		proc    *processor.Processor
 	)
 	for {
 		// TODO: Metrics.
@@ -37,33 +41,47 @@ func (s *Server) Process(src api.GWManagerService_ProcessServer) (err error) {
 		}
 
 		// Configure ctx.
-		ctx = field.WithContextFields(ctx, field.String("id", req.GetSessionId()), field.String("req", req.GetRequestData()))
-		mlogger.L(ctx).Info("Handle client request")
+		ctx = field.WithContextFields(ctx, field.String("session_id", req.GetSessionId()), field.String("req", req.GetRequestData()))
 
-		// Session ID.
+		// Session.
 		sessID, err := uuid.Parse(req.GetSessionId())
 		if err != nil {
 			return fmt.Errorf("unable to parse session uuid: %w", err)
 		}
-		sessionIDOnce.Do(func() { sessionID = sessID })
-		if sessionID != sessID {
-			return fmt.Errorf("session id mismatch")
-		}
-
-		// Getting session.
-		sess, err := s.contextService.GetSession(ctx, &contextcomponent.GetSessionParams{
-			SessionID: uuid.NullUUID{UUID: sessionID, Valid: true},
-			Active:    null.BoolFrom(true),
+		once.Do(func() {
+			session, err = s.contextService.GetSession(ctx, &contextcomponent.GetSessionParams{
+				SessionID: uuid.NullUUID{UUID: sessID, Valid: true},
+				Active:    null.BoolFrom(true),
+			})
+			if err != nil {
+				return
+			}
+			proc = processor.NewProcessor(session.Tree)
+			mlogger.L(ctx).Info("Session connected")
 		})
 		if err != nil {
 			return fmt.Errorf("failed to get session: %w", err)
 		}
+		if session.Model.ID != sessID {
+			return fmt.Errorf("session id mismatch")
+		}
+		if !session.Active() {
+			err = s.contextService.ReleaseSession(ctx, session.Model.ID, contextrepository.SessionStateClosedRotten)
+			return errors.Join(fmt.Errorf("session expired"), err)
+		}
 
-		// TODO: Handle request.
+		// Handle.
+		mlogger.L(ctx).Info("Handle client request")
+		resp, err := proc.Handle(ctx, &processor.Request{Data: req.GetRequestData()})
+		if err != nil {
+			return fmt.Errorf("failed to handle: %w", err)
+		}
 
 		// Sending response.
-		ret := new(api.ProcessResponse)
-		ret.ResponseData = stringPointer(sess.Model.ID.String())
+		ret := &api.ProcessResponse{
+			ResponseData: &resp.Data,
+			End:          resp.End,
+		}
 		err = src.Send(ret)
 		if err != nil {
 			return fmt.Errorf("failed to send message: %w", err)

@@ -3,25 +3,38 @@ package schema
 import "fmt"
 
 type NodeFinish struct {
-	BaseNode
+	baseNode
 }
 
 func (n *NodeFinish) Validate() error {
-	if err := n.BaseNode.Validate(); err != nil {
+	if err := n.baseNode.Validate(); err != nil {
 		return err
 	}
-	if n.BaseNode.NextID.Valid {
-		return fmt.Errorf("node %s is not finished since it has a next node", n.BaseNode.ID)
+	if n.baseNode.NextID.Valid {
+		return fmt.Errorf("node %s is not finished since it has a next node", n.baseNode.ID)
 	}
-	if n.BaseNode.NextErrorID.Valid {
-		return fmt.Errorf("node %s is not finished since it has error path", n.BaseNode.ID)
+	if n.baseNode.NextErrorID.Valid {
+		return fmt.Errorf("node %s is not finished since it has error path", n.baseNode.ID)
 	}
 
 	return nil
 }
 
-func (n *NodeFinish) FromNode(node Node) error {
-	return n.BaseNode.FromNode(node)
+func (n *NodeFinish) fromNode(node Node) error {
+	const fn = "NodeFinish.fromNode"
+	err := n.baseNode.fromNode(node)
+	if err != nil {
+		return fmt.Errorf("%s: %w", fn, err)
+	}
+	return nil
+}
+
+func (n *NodeFinish) InputType() NodeDataType {
+	return DataTypeString
+}
+
+func (n *NodeFinish) OutputType() NodeDataType {
+	return DataTypeString
 }
 
 var _ Node = (*NodeFinish)(nil)

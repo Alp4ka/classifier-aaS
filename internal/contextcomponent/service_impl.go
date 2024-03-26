@@ -35,7 +35,7 @@ func NewService(cfg Config) Service {
 	}
 }
 
-func (s *serviceImpl) ReleaseSession(ctx context.Context, sessionID uuid.UUID) error {
+func (s *serviceImpl) ReleaseSession(ctx context.Context, sessionID uuid.UUID, state repository.SessionState) error {
 	const fn = "serviceImpl.ReleaseSession"
 
 	err := s.repo.WithTransaction(
@@ -46,7 +46,7 @@ func (s *serviceImpl) ReleaseSession(ctx context.Context, sessionID uuid.UUID) e
 				tx,
 				repository.Session{
 					ID:       sessionID,
-					State:    repository.SessionStateClosedAgent,
+					State:    state,
 					ClosedAt: null.TimeFrom(timepkg.Now()),
 				},
 			)
@@ -179,12 +179,8 @@ func (s *serviceImpl) AcquireSession(ctx context.Context, params *AcquireSession
 		Agent:   null.StringFrom(params.Agent),
 		Active:  null.BoolFrom(true),
 	})
-	if err == nil {
-		if !session.Model.ValidUntil.Before(timepkg.Now()) &&
-			session.Model.State == repository.SessionStateActive &&
-			!session.Model.ClosedAt.Valid {
-			return session, nil
-		}
+	if err == nil && session.Active() {
+		return session, nil
 	} else if !errors.Is(err, ErrSessionDoesNotExist) {
 		return nil, fmt.Errorf("%s: %w", fn, err)
 	}
@@ -199,26 +195,6 @@ func (s *serviceImpl) AcquireSession(ctx context.Context, params *AcquireSession
 	}
 
 	return session, nil
-}
-
-type Request struct {
-	Req  string                 `json:"req"`
-	Meta map[string]interface{} `json:"meta,omitempty"`
-}
-
-type Response struct {
-	Resp string                 `json:"resp"`
-	Meta map[string]interface{} `json:"meta,omitempty"`
-}
-
-func (s *serviceImpl) Handle(ctx context.Context, session *Session, req *Request) (*Response, error) {
-	panic("pizdec")
-	// Process request corresponding to step.
-	// Save request.
-
-	// Update context.
-	// Commit.
-	return nil, nil
 }
 
 var _ Service = (*serviceImpl)(nil)
