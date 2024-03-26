@@ -1,11 +1,8 @@
 module github.com/Alp4ka/classifier-aaS
 
-go 1.21.8
-
-replace github.com/Alp4ka/classifier-aaS/pkg/api => ./pkg/api
+go 1.22
 
 require (
-	github.com/Alp4ka/classifier-aaS/pkg/api v0.0.0-00010101000000-000000000000
 	github.com/Alp4ka/mlogger v1.0.14
 	github.com/ansrivas/fiberprometheus/v2 v2.6.1
 	github.com/caarlos0/env v3.5.0+incompatible
@@ -23,6 +20,7 @@ require (
 )
 
 require (
+	github.com/Alp4ka/classifier-aaS/pkg/api v0.0.0-20240325230934-ddb2a93daca2 // indirect
 	github.com/andybalholm/brotli v1.0.6 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
