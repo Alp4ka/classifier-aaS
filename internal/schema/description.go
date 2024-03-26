@@ -8,17 +8,6 @@ import (
 
 const MaxNodesCount = 12
 
-type Tree map[NodeID]Node
-
-func (t Tree) GetStart() (Node, error) {
-	for _, node := range t {
-		if node.GetType() == NodeTypeStart {
-			return node, nil
-		}
-	}
-	return nil, fmt.Errorf("start node not found")
-}
-
 type Description struct {
 	nodes []*baseNode
 }
@@ -129,16 +118,11 @@ func (d *Description) MapAndValidate() (Tree, error) {
 
 	for _, cur := range mapping {
 		if cur.GetNextID().Valid {
-			if cur.OutputType() != mapping[cur.GetNextID().UUID].InputType() {
+			if ValidateOutputInput(cur.OutputType(), mapping[cur.GetNextID().UUID].InputType()) {
 				return nil, fmt.Errorf("node %s has next node %s which has incompatible input/output types", cur.GetID(), cur.GetNextID().UUID)
 			}
 		}
-
-		if cur.GetNextErrorID().Valid {
-			if cur.OutputType() != mapping[cur.GetNextErrorID().UUID].InputType() {
-				return nil, fmt.Errorf("node %s has next node %s which has incompatible input/output types", cur.GetID(), cur.GetNextID().UUID)
-			}
-		}
+		// TODO: smth with err id.
 	}
 	// Also a problem if there are to many start/finish nodes.
 	if cntStartNodes != 1 {

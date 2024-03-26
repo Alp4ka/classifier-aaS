@@ -30,11 +30,11 @@ func (n *NodeFinish) fromNode(node Node) error {
 }
 
 func (n *NodeFinish) InputType() NodeDataType {
-	return DataTypeString
+	return DataTypeAny
 }
 
 func (n *NodeFinish) OutputType() NodeDataType {
-	return DataTypeString
+	return DataTypeNone
 }
 
 var _ Node = (*NodeFinish)(nil)

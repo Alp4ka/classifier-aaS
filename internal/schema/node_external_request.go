@@ -82,7 +82,7 @@ func (n *NodeExternalRequest) fromNode(node Node) error {
 }
 
 func (n *NodeExternalRequest) InputType() NodeDataType {
-	return DataTypeString
+	return DataTypeNoneOrString
 }
 
 func (n *NodeExternalRequest) OutputType() NodeDataType {

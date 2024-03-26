@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-const DefaultSessionLifetime = time.Hour
+const DefaultSessionLifetime = time.Minute * 10
 
 type Config struct {
 	SchemaService schemacomponent.Service

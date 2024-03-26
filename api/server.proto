@@ -23,11 +23,14 @@ message ReleaseSessionResponse {
 message ProcessRequest {
   string session_id = 1;
   string request_data = 2;
+  string request_id = 3;
 }
 
 message ProcessResponse {
   optional string response_data = 1;
   bool end = 2;
+  bool request_required = 3;
+  bool response_required = 4;
 }
 
 service GWManagerService {

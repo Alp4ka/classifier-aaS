@@ -14,7 +14,7 @@ func (s *Server) ReleaseSession(ctx context.Context, req *api.ReleaseSessionRequ
 		return nil, fmt.Errorf("unable to parse session uuid: %w", err)
 	}
 
-	err = s.contextService.ReleaseSession(ctx, sessionID, contextrepository.SessionStateClosedAgent)
+	err = s.contextService.ReleaseSession(ctx, sessionID, contextrepository.SessionStateClosedGateway)
 	if err != nil {
 		return nil, fmt.Errorf("failed to release session: %w", err)
 	}

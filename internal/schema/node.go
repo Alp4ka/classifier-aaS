@@ -16,9 +16,23 @@ type NodeDataType string
 type NodeID = uuid.UUID
 
 const (
-	DataTypeString NodeDataType = "string"
-	DataTypeJSON   NodeDataType = "json"
+	DataTypeNone         NodeDataType = "none"
+	DataTypeString       NodeDataType = "string"
+	DataTypeNoneOrString NodeDataType = "none_or_string"
+	DataTypeAny          NodeDataType = "any"
 )
+
+func ValidateOutputInput(output, input NodeDataType) bool {
+	if input == DataTypeAny {
+		return true
+	}
+
+	if input == DataTypeNoneOrString {
+		return output == DataTypeNone || output == DataTypeString
+	}
+
+	return output == input
+}
 
 const (
 	NodeTypeStart           NodeType = "start"

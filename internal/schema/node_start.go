@@ -16,11 +16,11 @@ func (n *NodeStart) fromNode(node Node) error {
 }
 
 func (n *NodeStart) InputType() NodeDataType {
-	return DataTypeString
+	return DataTypeNone
 }
 
 func (n *NodeStart) OutputType() NodeDataType {
-	return DataTypeString
+	return DataTypeNone
 }
 
 var _ Node = (*NodeStart)(nil)

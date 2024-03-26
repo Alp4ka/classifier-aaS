@@ -16,7 +16,7 @@ func (n *NodeListen) fromNode(node Node) error {
 }
 
 func (n *NodeListen) InputType() NodeDataType {
-	return DataTypeString
+	return DataTypeAny
 }
 
 func (n *NodeListen) OutputType() NodeDataType {

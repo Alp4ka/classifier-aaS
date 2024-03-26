@@ -11,6 +11,7 @@ import (
 	"github.com/Alp4ka/mlogger/field"
 	"github.com/google/uuid"
 	"github.com/guregu/null/v5"
+	"github.com/hashicorp/go-set/v2"
 	"io"
 	"sync"
 )
@@ -27,6 +28,7 @@ func (s *Server) Process(src api.GWManagerService_ProcessServer) (err error) {
 		once    sync.Once
 		session *contextcomponent.Session
 		proc    *processor.Processor
+		reqids  = set.New[string](1)
 	)
 	for {
 		// TODO: Metrics.
@@ -34,8 +36,12 @@ func (s *Server) Process(src api.GWManagerService_ProcessServer) (err error) {
 		// Reading request.
 		req, err := src.Recv()
 		if err == io.EOF {
+			err = s.contextService.ReleaseSession(ctx, session.Model.ID, contextrepository.SessionStateClosedAgent)
+			if err != nil {
+				return fmt.Errorf("failed to release session as agent: %w", err)
+			}
 			mlogger.L(ctx).Info("Client closed connection")
-			break
+			return nil
 		} else if err != nil {
 			return fmt.Errorf("failed to receive client request: %w", err)
 		}
@@ -56,7 +62,11 @@ func (s *Server) Process(src api.GWManagerService_ProcessServer) (err error) {
 			if err != nil {
 				return
 			}
-			proc = processor.NewProcessor(session.Tree)
+			proc, err = processor.NewProcessor(session.Tree)
+			if err != nil {
+				return
+			}
+			proc.Start(ctx)
 			mlogger.L(ctx).Info("Session connected")
 		})
 		if err != nil {
@@ -72,7 +82,7 @@ func (s *Server) Process(src api.GWManagerService_ProcessServer) (err error) {
 
 		// Handle.
 		mlogger.L(ctx).Info("Handle client request")
-		resp, err := proc.Handle(ctx, &processor.Request{Data: req.GetRequestData()})
+		resp, err := proc.Handle(&processor.Request{Data: req.GetRequestData()})
 		if err != nil {
 			return fmt.Errorf("failed to handle: %w", err)
 		}
@@ -86,7 +96,12 @@ func (s *Server) Process(src api.GWManagerService_ProcessServer) (err error) {
 		if err != nil {
 			return fmt.Errorf("failed to send message: %w", err)
 		}
+		if ret.End {
+			err = s.contextService.ReleaseSession(ctx, session.Model.ID, contextrepository.SessionStateFinished)
+			if err != nil {
+				return fmt.Errorf("failed to release session as finish: %w", err)
+			}
+			return nil
+		}
 	}
-
-	return nil
 }

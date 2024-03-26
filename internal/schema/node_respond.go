@@ -30,7 +30,7 @@ func (n *NodeRespond) fromNode(node Node) error {
 }
 
 func (n *NodeRespond) InputType() NodeDataType {
-	return DataTypeString
+	return DataTypeNoneOrString
 }
 
 func (n *NodeRespond) OutputType() NodeDataType {

@@ -52,10 +52,12 @@ func (cs *SessionState) Scan(value interface{}) error {
 }
 
 const (
-	SessionStateActive       SessionState = "active"
-	SessionStateClosedAgent  SessionState = "closed_by_agent"
-	SessionStateClosedRotten SessionState = "closed_by_rot"
-	SessionStateError        SessionState = "error"
+	SessionStateActive        SessionState = "active"
+	SessionStateClosedAgent   SessionState = "closed_by_agent"
+	SessionStateClosedGateway SessionState = "closed_by_gateway"
+	SessionStateFinished      SessionState = "finished"
+	SessionStateClosedRotten  SessionState = "closed_by_rot"
+	SessionStateError         SessionState = "error"
 )
 
 var _availableSessionStates = map[SessionState]struct{}{

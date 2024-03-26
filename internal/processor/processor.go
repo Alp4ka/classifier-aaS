@@ -7,12 +7,23 @@ import (
 )
 
 type Processor struct {
-	tree    schema.Tree
-	curNode schema.Node
+	ctx     context.Context
+	tree    tree
+	curNode nodeProc
+
+	respChan chan *Response
 }
 
-func NewProcessor(tree schema.Tree) *Processor {
-	return &Processor{tree: tree}
+func NewProcessor(schemaTree schema.Tree) (*Processor, error) {
+	const fn = "NewProcessor"
+
+	t := make(tree)
+	err := t.fromSchemaTree(schemaTree)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", fn, err)
+	}
+
+	return &Processor{tree: t}, nil
 }
 
 type Request struct {
@@ -20,21 +31,29 @@ type Request struct {
 }
 
 type Response struct {
-	Data string
-	End  bool
+	Data            string
+	End             bool
+	RequestRequired bool
 }
 
-func (p *Processor) Handle(ctx context.Context, req *Request) (*Response, error) {
+func (p *Processor) Start(ctx context.Context) <-chan *Response {
+	p.ctx = ctx
+	p.respChan = make(chan *Response)
+
+	return p.respChan
+}
+
+func (p *Processor) Handle(req *Request) error {
 	const fn = "Processor.Handle"
 
 	// TODO: Save current node id every step.
+	// TODO: Events journal.
 	if p.curNode == nil {
-		start, err := p.tree.GetStart()
+		start, err := p.tree.getStart()
 		if err != nil {
 			return nil, fmt.Errorf("%s: %w", fn, err)
 		}
 		p.curNode = start
-		fmt.Println(p.curNode)
 	}
 
 	return &Response{Data: "zhopa123"}, nil
