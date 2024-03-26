@@ -212,12 +212,7 @@ type Response struct {
 }
 
 func (s *serviceImpl) Handle(ctx context.Context, session *Session, req *Request) (*Response, error) {
-	panic("not implemented")
-
-	// Load schema if not presented.
-	// Create context if not presented.
-
-	// Get step of schema.
+	panic("pizdec")
 	// Process request corresponding to step.
 	// Save request.
 

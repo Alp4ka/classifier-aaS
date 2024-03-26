@@ -62,8 +62,8 @@ func (s *Server) Process(src api.GWManagerService_ProcessServer) (err error) {
 		// TODO: Handle request.
 
 		// Sending response.
-		ret := &api.ProcessResponse{}
-		*ret.ResponseData = sess.Model.ID.String()
+		ret := new(api.ProcessResponse)
+		ret.ResponseData = stringPointer(sess.Model.ID.String())
 		err = src.Send(ret)
 		if err != nil {
 			return fmt.Errorf("failed to send message: %w", err)
