@@ -6,6 +6,7 @@ services:
     restart: always
     ports:
       - "227:1111"
+      - "229:1113"
     networks:
       - classifier-aas-net
     depends_on:

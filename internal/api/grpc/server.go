@@ -34,7 +34,7 @@ func New(cfg Config) *Server {
 }
 
 func (s *Server) Run() error {
-	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", s.port))
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", s.port))
 	if err != nil {
 		return err
 	}
