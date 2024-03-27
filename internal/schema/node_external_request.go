@@ -86,7 +86,7 @@ func (n *NodeExternalRequest) InputType() NodeDataType {
 }
 
 func (n *NodeExternalRequest) OutputType() NodeDataType {
-	return DataTypeString
+	return DataTypeNone
 }
 
 var _ Node = (*NodeExternalRequest)(nil)
