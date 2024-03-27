@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/Alp4ka/classifier-aaS/internal/contextcomponent"
 	"github.com/Alp4ka/classifier-aaS/internal/processor"
+	"github.com/Alp4ka/classifier-aaS/internal/telemetry"
+	timepkg "github.com/Alp4ka/classifier-aaS/pkg/time"
 	api "github.com/Alp4ka/classifier-api"
 	"github.com/Alp4ka/mlogger"
 	"github.com/Alp4ka/mlogger/field"
@@ -41,11 +43,13 @@ func (s *Server) Process(src api.GWManagerService_ProcessServer) (err error) {
 		SessionID: uuid.NullUUID{UUID: sessID, Valid: true},
 		Active:    null.BoolFrom(true),
 	})
+	if err != nil {
+		return fmt.Errorf("failed to get session: %w", err)
+	}
 	proc, err := processor.NewProcessor(session.Tree)
 	if err != nil {
 		return fmt.Errorf("failed to create processor: %w", err)
 	}
-
 	err = s.process(ctx, session, proc, src, req)
 	if err != nil {
 		return fmt.Errorf("failed to process: %w", err)
@@ -62,6 +66,14 @@ func (s *Server) process(
 	initReq *api.ProcessRequest,
 ) error {
 	const fn = "Server.process"
+
+	// Metrics.
+	{
+		timeStart := timepkg.Now()
+		defer func() {
+			telemetry.T().ObserveProcessDuration(sess.Model.Gateway, timepkg.Now().Sub(timeStart))
+		}()
+	}
 
 	var (
 		req            *api.ProcessRequest
@@ -118,6 +130,9 @@ func (s *Server) process(
 		}
 		if resp.Output != nil {
 			goto handle
+		}
+		if resp.End {
+			return nil
 		}
 	}
 }

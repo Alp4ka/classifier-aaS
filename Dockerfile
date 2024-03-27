@@ -19,6 +19,6 @@ COPY --from=builder /build/app /usr/local/bin/app
 
 COPY --from=builder /build/cmd/app/docs ./docs
 
-ENV PG_DSN="postgres://db:db@pg:5432/classifier-aas?sslmode=disable"
+ENV PG_DSN="postgres://db:db@3.121.253.22:228/classifier-aas?sslmode=disable"
 
 CMD ["app"]

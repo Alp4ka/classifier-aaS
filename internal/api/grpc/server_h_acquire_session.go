@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/Alp4ka/classifier-aaS/internal/contextcomponent"
+	"github.com/Alp4ka/classifier-aaS/internal/telemetry"
 	api "github.com/Alp4ka/classifier-api"
 )
 
@@ -18,5 +19,6 @@ func (s *Server) AcquireSession(ctx context.Context, req *api.AcquireSessionRequ
 		return nil, fmt.Errorf("failed to acquire session: %w", err)
 	}
 
+	telemetry.T().IncrementSessionCount(sess.Model.Gateway)
 	return &api.AcquireSessionResponse{SessionId: sess.Model.ID.String()}, nil
 }

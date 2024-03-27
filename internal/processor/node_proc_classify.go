@@ -12,7 +12,7 @@ type classifyNodeProc struct {
 }
 
 func (l *classifyNodeProc) process(ctx context.Context, req *request) (*response, error) {
-	cls, err := openai.NewClassifier(openai.Config{APIKey: "sk-FDSCEjSJClUbk4I0RMRVykBpvNl5C4YR"})
+	cls, err := openai.NewClassifier(openai.Config{APIKey: "sk-FDSCEjSJClUbk4I0RMRVykBpvNl5C4YR"}) // TODO: PIZDEC.
 	if err != nil {
 		return nil, err
 	}
