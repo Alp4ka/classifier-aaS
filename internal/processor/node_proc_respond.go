@@ -12,9 +12,8 @@ type respondNodeProc struct {
 func (l *respondNodeProc) process(ctx context.Context, req *request) (*response, error) {
 	// TODO: validate input.
 	return &response{
-		data:     l.Response,
-		dataType: l.OutputType(),
-		responseRequired:
+		pipeOutput:       l.Response,
+		responseRequired: true,
 	}, nil
 }
 

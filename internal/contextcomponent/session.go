@@ -4,6 +4,7 @@ import (
 	"github.com/Alp4ka/classifier-aaS/internal/contextcomponent/repository"
 	"github.com/Alp4ka/classifier-aaS/internal/schema"
 	timepkg "github.com/Alp4ka/classifier-aaS/pkg/time"
+	"github.com/google/uuid"
 )
 
 type Session struct {
@@ -12,7 +13,17 @@ type Session struct {
 }
 
 func (s *Session) Active() bool {
-	return s.Model.ValidUntil.After(timepkg.Now()) &&
-		s.Model.State == repository.SessionStateActive &&
-		!s.Model.ClosedAt.Valid
+	return s.Model.State == repository.SessionStateActive
+}
+
+func (s *Session) Operable() bool {
+	return s.Active() && !s.Model.ClosedAt.Valid && !s.Expired()
+}
+
+func (s *Session) Expired() bool {
+	return s.Model.ValidUntil.After(timepkg.Now())
+}
+
+func (s *Session) ID() uuid.UUID {
+	return s.Model.ID
 }

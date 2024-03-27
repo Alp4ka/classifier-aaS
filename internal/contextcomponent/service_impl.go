@@ -35,17 +35,32 @@ func NewService(cfg Config) Service {
 	}
 }
 
-func (s *serviceImpl) ReleaseSession(ctx context.Context, sessionID uuid.UUID, state repository.SessionState) error {
+func (s *serviceImpl) ReleaseSession(ctx context.Context, sessID uuid.UUID, state repository.SessionState) error {
 	const fn = "serviceImpl.ReleaseSession"
 
 	err := s.repo.WithTransaction(
 		ctx,
 		func(innerCtx context.Context, tx sqlpkg.Tx) error {
-			_, err := s.repo.UpdateSession(
+			sess, err := s.repo.GetSession(
+				innerCtx,
+				tx,
+				&repository.GetSessionFilter{
+					ID: uuid.NullUUID{UUID: sessID, Valid: true},
+				})
+			if err != nil {
+				if errors.Is(err, storage.ErrEntityNotFound) {
+					return ErrSessionDoesNotExist
+				}
+				return fmt.Errorf("unable to find session: %w", err)
+			} else if sess.State != repository.SessionStateActive { // Already closed.
+				return nil
+			}
+
+			_, err = s.repo.UpdateSession(
 				innerCtx,
 				tx,
 				repository.Session{
-					ID:       sessionID,
+					ID:       sessID,
 					State:    state,
 					ClosedAt: null.TimeFrom(timepkg.Now()),
 				},
@@ -179,7 +194,7 @@ func (s *serviceImpl) AcquireSession(ctx context.Context, params *AcquireSession
 		Agent:   null.StringFrom(params.Agent),
 		Active:  null.BoolFrom(true),
 	})
-	if err == nil && session.Active() {
+	if err == nil && session.Operable() {
 		return session, nil
 	} else if !errors.Is(err, ErrSessionDoesNotExist) {
 		return nil, fmt.Errorf("%s: %w", fn, err)

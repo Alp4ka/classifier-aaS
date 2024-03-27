@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/Alp4ka/classifier-aaS/internal/contextcomponent"
-	"github.com/Alp4ka/classifier-aaS/pkg/api"
+	api "github.com/Alp4ka/classifier-api"
 )
 
 func (s *Server) AcquireSession(ctx context.Context, req *api.AcquireSessionRequest) (*api.AcquireSessionResponse, error) {

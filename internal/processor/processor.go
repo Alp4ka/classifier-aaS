@@ -4,14 +4,18 @@ import (
 	"context"
 	"fmt"
 	"github.com/Alp4ka/classifier-aaS/internal/schema"
+	"sync/atomic"
 )
 
 type Processor struct {
-	ctx     context.Context
-	tree    tree
-	curNode nodeProc
+	ctx    context.Context
+	cancel context.CancelFunc
 
-	respChan chan *Response
+	tree tree
+
+	reqExpect atomic.Bool
+	reqChan   chan *Request
+	respChan  chan *Response
 }
 
 func NewProcessor(schemaTree schema.Tree) (*Processor, error) {
@@ -31,30 +35,63 @@ type Request struct {
 }
 
 type Response struct {
-	Data            string
-	End             bool
-	RequestRequired bool
+	Data             string
+	End              bool
+	RequestRequired  bool
+	ResponseRequired bool
+	Error            error
 }
 
-func (p *Processor) Start(ctx context.Context) <-chan *Response {
-	p.ctx = ctx
+func (p *Processor) Start(ctx context.Context) (<-chan *Response, error) {
+	start, err := p.tree.getStart()
+	if err != nil {
+
+		return nil, err
+	}
+	curNode := start
+
+	// Process
+	p.ctx, p.cancel = context.WithCancel(ctx)
 	p.respChan = make(chan *Response)
+	p.reqChan = make(chan *Request)
+
+	go func() {
+		var req *Request
+
+		nresp, nerr := curNode.process(p.ctx, &request{})
+		if nerr != nil {
+			p.respChan <- &Response{
+				Data:            "",
+				End:             true,
+				Error:           nerr,
+				RequestRequired: false,
+			}
+			return
+		}
+
+		for {
+			select {
+			case <-p.ctx.Done():
+				close(p.respChan)
+				return
+			case req = <-p.reqChan:
+			}
+		}
+	}()
 
 	return p.respChan
 }
 
-func (p *Processor) Handle(req *Request) error {
+func (p *Processor) Handle(req *Request) {
 	const fn = "Processor.Handle"
 
 	// TODO: Save current node id every step.
 	// TODO: Events journal.
-	if p.curNode == nil {
-		start, err := p.tree.getStart()
-		if err != nil {
-			return nil, fmt.Errorf("%s: %w", fn, err)
-		}
-		p.curNode = start
-	}
+	// TODO: If expecting message.
+	p.reqChan <- req
+}
 
-	return &Response{Data: "zhopa123"}, nil
+func (p *Processor) Close() {
+	close(p.reqChan)
+	p.cancel()
 }

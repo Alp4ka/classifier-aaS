@@ -1,3 +1,3 @@
 package telemetry
 
-const Namespace = "classifier-aas"
+const Namespace = "classifier_aas"

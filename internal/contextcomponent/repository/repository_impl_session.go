@@ -9,6 +9,7 @@ import (
 	sqlpkg "github.com/Alp4ka/classifier-aaS/pkg/sql"
 	timepkg "github.com/Alp4ka/classifier-aaS/pkg/time"
 	"github.com/doug-martin/goqu/v9"
+	"github.com/doug-martin/goqu/v9/exp"
 	"github.com/google/uuid"
 	"github.com/guregu/null/v5"
 )
@@ -21,7 +22,7 @@ type GetSessionFilter struct {
 }
 
 func (f *GetSessionFilter) toDataset() *goqu.SelectDataset {
-	query := goqu.From(tbl_Session)
+	query := goqu.From(tbl_Session).ForUpdate(exp.Wait)
 
 	if f.ID.Valid {
 		query = query.Where(tbl_Session.Col("id").Eq(f.ID.UUID))

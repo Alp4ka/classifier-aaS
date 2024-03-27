@@ -6,13 +6,12 @@ import (
 )
 
 type request struct {
-	data     any
-	dataType schema.NodeDataType
+	data any
 }
 
 type response struct {
-	data             any
-	dataType         schema.NodeDataType
+	pipeOutput       any
+	resp             string
 	err              error
 	end              bool
 	requestRequired  bool
