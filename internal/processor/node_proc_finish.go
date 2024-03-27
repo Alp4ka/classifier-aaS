@@ -11,9 +11,7 @@ type finishNodeProc struct {
 
 func (l *finishNodeProc) process(ctx context.Context, req *request) (*response, error) {
 	return &response{
-		dataType:        l.OutputType(),
-		end:             true,
-		requestRequired: false,
+		pipeEnd: true,
 	}, nil
 }
 

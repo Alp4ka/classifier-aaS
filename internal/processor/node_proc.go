@@ -6,23 +6,24 @@ import (
 )
 
 type request struct {
-	data any
+	pipeInput any
+	userInput string
 }
 
 type response struct {
-	pipeOutput       any
-	resp             string
-	err              error
-	end              bool
-	requestRequired  bool
-	responseRequired bool
+	pipeOutput any
+	pipeErr    error
+	pipeEnd    bool
+
+	userOutput        *string
+	userInputRequired bool
 }
 
-type procFunc func(ctx context.Context, req *request) (*response, error)
+func (r *response) fall() bool {
+	return !r.pipeEnd && r.userOutput == nil && !r.userInputRequired
+}
 
 type nodeProc interface {
 	schema.Node
 	process(ctx context.Context, req *request) (*response, error)
 }
-
-var _ procFunc = (nodeProc)(nil).process

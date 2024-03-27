@@ -61,8 +61,10 @@ const (
 )
 
 var _availableSessionStates = map[SessionState]struct{}{
-	SessionStateActive:       {},
-	SessionStateClosedAgent:  {},
-	SessionStateClosedRotten: {},
-	SessionStateError:        {},
+	SessionStateActive:        {},
+	SessionStateClosedAgent:   {},
+	SessionStateClosedGateway: {},
+	SessionStateFinished:      {},
+	SessionStateClosedRotten:  {},
+	SessionStateError:         {},
 }

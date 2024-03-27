@@ -194,8 +194,10 @@ func (s *serviceImpl) AcquireSession(ctx context.Context, params *AcquireSession
 		Agent:   null.StringFrom(params.Agent),
 		Active:  null.BoolFrom(true),
 	})
-	if err == nil && session.Operable() {
-		return session, nil
+	if err == nil {
+		if session.Operable() {
+			return session, nil
+		}
 	} else if !errors.Is(err, ErrSessionDoesNotExist) {
 		return nil, fmt.Errorf("%s: %w", fn, err)
 	}

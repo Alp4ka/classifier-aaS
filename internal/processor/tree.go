@@ -46,6 +46,15 @@ func (t *tree) getStart() (nodeProc, error) {
 	return nil, fmt.Errorf("start node not found")
 }
 
+func (t *tree) getFinish() (nodeProc, error) {
+	for _, n := range *t {
+		if n.GetType() == schema.NodeTypeFinish {
+			return n, nil
+		}
+	}
+	return nil, fmt.Errorf("finish node not found")
+}
+
 func (t *tree) get(id schema.NodeID) (nodeProc, error) {
 	n, ok := (*t)[id]
 	if !ok {

@@ -4,18 +4,14 @@ import (
 	"context"
 	"fmt"
 	"github.com/Alp4ka/classifier-aaS/internal/schema"
-	"sync/atomic"
+	"github.com/Alp4ka/mlogger"
+	"github.com/Alp4ka/mlogger/field"
 )
 
 type Processor struct {
-	ctx    context.Context
-	cancel context.CancelFunc
-
-	tree tree
-
-	reqExpect atomic.Bool
-	reqChan   chan *Request
-	respChan  chan *Response
+	tree    tree
+	curNode nodeProc
+	nReq    *request
 }
 
 func NewProcessor(schemaTree schema.Tree) (*Processor, error) {
@@ -27,7 +23,13 @@ func NewProcessor(schemaTree schema.Tree) (*Processor, error) {
 		return nil, fmt.Errorf("%s: %w", fn, err)
 	}
 
-	return &Processor{tree: t}, nil
+	start, err := t.getStart()
+	if err != nil {
+
+		return nil, err
+	}
+
+	return &Processor{tree: t, curNode: start, nReq: new(request)}, nil
 }
 
 type Request struct {
@@ -35,63 +37,74 @@ type Request struct {
 }
 
 type Response struct {
-	Data             string
-	End              bool
-	RequestRequired  bool
-	ResponseRequired bool
-	Error            error
+	Output        *string
+	InputRequired bool
+	End           bool
 }
 
-func (p *Processor) Start(ctx context.Context) (<-chan *Response, error) {
-	start, err := p.tree.getStart()
-	if err != nil {
-
-		return nil, err
-	}
-	curNode := start
-
-	// Process
-	p.ctx, p.cancel = context.WithCancel(ctx)
-	p.respChan = make(chan *Response)
-	p.reqChan = make(chan *Request)
-
-	go func() {
-		var req *Request
-
-		nresp, nerr := curNode.process(p.ctx, &request{})
-		if nerr != nil {
-			p.respChan <- &Response{
-				Data:            "",
-				End:             true,
-				Error:           nerr,
-				RequestRequired: false,
-			}
-			return
-		}
-
-		for {
-			select {
-			case <-p.ctx.Done():
-				close(p.respChan)
-				return
-			case req = <-p.reqChan:
-			}
-		}
-	}()
-
-	return p.respChan
-}
-
-func (p *Processor) Handle(req *Request) {
+func (p *Processor) Handle(ctx context.Context, req *Request) (*Response, error) {
 	const fn = "Processor.Handle"
 
-	// TODO: Save current node id every step.
-	// TODO: Events journal.
-	// TODO: If expecting message.
-	p.reqChan <- req
-}
+	p.nReq.userInput = req.Data
+	for {
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		default:
+		}
 
-func (p *Processor) Close() {
-	close(p.reqChan)
-	p.cancel()
+		mlogger.L(ctx).Info("Processing node",
+			field.String("id", p.curNode.GetID().String()),
+			field.String("type", string(p.curNode.GetType())),
+		)
+		nRet, err := p.curNode.process(ctx, p.nReq)
+		if err != nil {
+			return nil, fmt.Errorf("%s: %w", fn, err)
+		}
+
+		// Return conditions.
+		if nRet.pipeEnd {
+			return &Response{
+				End: true,
+			}, nil
+		} else if !nRet.fall() {
+			return &Response{
+				Output:        nRet.userOutput,
+				InputRequired: nRet.userInputRequired,
+				End:           false,
+			}, nil
+		}
+
+		p.nReq.pipeInput = nRet.pipeOutput
+		// Success path.
+		if nRet.pipeErr == nil {
+			if p.curNode.GetNextID().Valid { // goto finish.
+				nextNode, err := p.tree.get(p.curNode.GetNextID().UUID)
+				if err != nil {
+					return nil, fmt.Errorf("%s: %w", fn, err)
+				}
+				p.curNode = nextNode
+			} else { // goto finish.
+				finishNode, err := p.tree.getFinish()
+				if err != nil {
+					return nil, fmt.Errorf("%s: %w", fn, err)
+				}
+				p.curNode = finishNode
+			}
+		} else { // Error path.
+			if p.curNode.GetNextErrorID().Valid {
+				nextNode, err := p.tree.get(p.curNode.GetNextErrorID().UUID)
+				if err != nil {
+					return nil, fmt.Errorf("%s: %w", fn, err)
+				}
+				p.curNode = nextNode
+			} else { // goto finish.
+				finishNode, err := p.tree.getFinish()
+				if err != nil {
+					return nil, fmt.Errorf("%s: %w", fn, err)
+				}
+				p.curNode = finishNode
+			}
+		}
+	}
 }

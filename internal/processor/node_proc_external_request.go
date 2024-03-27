@@ -10,8 +10,7 @@ type externalRequestNodeProc struct {
 }
 
 func (l *externalRequestNodeProc) process(ctx context.Context, req *request) (*response, error) {
-	// TODO: validate input.
-	return defaultProcess(ctx, req)
+	panic("implement me")
 }
 
 var _ nodeProc = (*externalRequestNodeProc)(nil)

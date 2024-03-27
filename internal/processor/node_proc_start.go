@@ -11,9 +11,7 @@ type startNodeProc struct {
 
 func (l *startNodeProc) process(ctx context.Context, req *request) (*response, error) {
 	return &response{
-		dataType:        l.OutputType(),
-		end:             false,
-		requestRequired: false,
+		pipeOutput: nil,
 	}, nil
 }
 

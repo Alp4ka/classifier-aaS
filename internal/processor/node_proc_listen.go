@@ -15,14 +15,11 @@ func (l *listenNodeProc) process(ctx context.Context, req *request) (*response, 
 	if l.cnt == 0 {
 		l.cnt++
 		return &response{
-			end:             false,
-			requestRequired: true,
+			userInputRequired: true,
 		}, nil
 	}
 	return &response{
-		data:     req.data,
-		dataType: l.OutputType(),
-		end:      false,
+		pipeOutput: req.userInput,
 	}, nil
 }
 

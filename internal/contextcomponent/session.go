@@ -21,7 +21,7 @@ func (s *Session) Operable() bool {
 }
 
 func (s *Session) Expired() bool {
-	return s.Model.ValidUntil.After(timepkg.Now())
+	return s.Model.ValidUntil.Before(timepkg.Now())
 }
 
 func (s *Session) ID() uuid.UUID {

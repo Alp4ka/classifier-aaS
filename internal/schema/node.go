@@ -13,6 +13,23 @@ func (n NodeType) Hash() string {
 
 type NodeDataType string
 
+func (n NodeDataType) ValidateInput(input any) bool {
+	switch n {
+	case DataTypeNone:
+		return input == nil
+	case DataTypeString:
+		_, ok := input.(string)
+		return ok
+	case DataTypeNoneOrString:
+		_, ok := input.(string)
+		return ok || input == nil
+	case DataTypeAny:
+		return true
+	default:
+		return false
+	}
+}
+
 type NodeID = uuid.UUID
 
 const (

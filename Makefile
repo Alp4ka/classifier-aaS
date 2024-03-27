@@ -17,9 +17,3 @@ migrate:
 .PHONY: down-all
 down-all:
 	sql-migrate down -limit 100 -env="local"
-
-
-.PHONY: gen
-gen:
-	protoc -I ./api --go_out=./pkg/api --go-grpc_out=./pkg/api ./api/*.proto
-

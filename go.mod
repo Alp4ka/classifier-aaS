@@ -3,7 +3,8 @@ module github.com/Alp4ka/classifier-aaS
 go 1.22
 
 require (
-	github.com/Alp4ka/classifier-api v0.0.2
+	github.com/Alp4ka/classifier v1.0.0
+	github.com/Alp4ka/classifier-api v0.0.4
 	github.com/Alp4ka/mlogger v1.0.14
 	github.com/ansrivas/fiberprometheus/v2 v2.6.1
 	github.com/caarlos0/env v3.5.0+incompatible
