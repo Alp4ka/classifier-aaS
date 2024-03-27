@@ -118,8 +118,14 @@ func (d *Description) MapAndValidate() (Tree, error) {
 
 	for _, cur := range mapping {
 		if cur.GetNextID().Valid {
-			if ValidateOutputInput(cur.OutputType(), mapping[cur.GetNextID().UUID].InputType()) {
-				return nil, fmt.Errorf("node %s has next node %s which has incompatible input/output types", cur.GetID(), cur.GetNextID().UUID)
+			next := mapping[cur.GetNextID().UUID]
+			if !ValidateOutputInput(cur.OutputType(), next.InputType()) {
+				return nil, fmt.Errorf("node %s has next node %s which has incompatible input/output types. %s -> %s", //nolint:govet
+					cur.GetID(),
+					cur.GetNextID().UUID,
+					cur.OutputType(),
+					next.InputType(),
+				)
 			}
 		}
 		// TODO: smth with err id.
