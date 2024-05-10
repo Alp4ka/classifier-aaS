@@ -1,10 +1,10 @@
 package grpc
 
 import (
-	"github.com/Alp4ka/classifier-aaS/internal/contextcomponent"
+	"github.com/Alp4ka/classifier-aaS/internal/components/context"
 )
 
 type Config struct {
 	Port           int
-	ContextService contextcomponent.Service
+	ContextService context.Service
 }

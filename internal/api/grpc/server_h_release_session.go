@@ -3,7 +3,7 @@ package grpc
 import (
 	"context"
 	"fmt"
-	contextrepository "github.com/Alp4ka/classifier-aaS/internal/contextcomponent/repository"
+	contextrepository "github.com/Alp4ka/classifier-aaS/internal/components/context/repository"
 	api "github.com/Alp4ka/classifier-api"
 	"github.com/google/uuid"
 )

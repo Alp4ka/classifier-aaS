@@ -2,8 +2,8 @@ package http
 
 import (
 	"errors"
-	"github.com/Alp4ka/classifier-aaS/internal/schema"
 	"github.com/Alp4ka/classifier-aaS/internal/schemacomponent"
+	"github.com/Alp4ka/classifier-aaS/internal/schemacomponent/entities"
 	"github.com/Alp4ka/mlogger"
 	"github.com/Alp4ka/mlogger/field"
 	"github.com/gofiber/fiber/v2"
@@ -11,8 +11,8 @@ import (
 )
 
 type hUpdateSchemaReq struct {
-	ID          uuid.UUID           `json:"id"`
-	Description *schema.Description `json:"description"`
+	ID          uuid.UUID             `json:"id"`
+	Description *entities.Description `json:"description"`
 }
 
 func (s *Server) hUpdateSchema(c *fiber.Ctx) error {

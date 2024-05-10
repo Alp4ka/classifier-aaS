@@ -52,7 +52,7 @@ func (s *Server) configureRouting() {
 	apiGroup.Use(s.mwRateLimiter())
 	apiGroup.Use(s.mwContentChecker())
 
-	// Schema.
+	// SchemaReq.
 	schemaGroup := apiGroup.Group("/schema")
 	schemaGroup.Get("/:id", s.hGetActualSchema)
 	schemaGroup.Post("", s.hCreateSchema)

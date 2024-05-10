@@ -5,10 +5,10 @@ import (
 	"errors"
 	"github.com/Alp4ka/classifier-aaS/internal/api/grpc"
 	"github.com/Alp4ka/classifier-aaS/internal/api/http"
-	"github.com/Alp4ka/classifier-aaS/internal/contextcomponent"
-	contextrepository "github.com/Alp4ka/classifier-aaS/internal/contextcomponent/repository"
-	"github.com/Alp4ka/classifier-aaS/internal/schemacomponent"
-	schemarepository "github.com/Alp4ka/classifier-aaS/internal/schemacomponent/repository"
+	contextcomponent "github.com/Alp4ka/classifier-aaS/internal/components/context"
+	contextrepository "github.com/Alp4ka/classifier-aaS/internal/components/context/repository"
+	schemacomponent "github.com/Alp4ka/classifier-aaS/internal/components/schema"
+	schemarepository "github.com/Alp4ka/classifier-aaS/internal/components/schema/repository"
 )
 
 type App struct {

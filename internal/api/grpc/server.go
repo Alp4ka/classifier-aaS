@@ -2,13 +2,13 @@ package grpc
 
 import (
 	"fmt"
-	"github.com/Alp4ka/classifier-aaS/internal/contextcomponent"
+	"github.com/Alp4ka/classifier-aaS/internal/components/context"
 	api "github.com/Alp4ka/classifier-api"
 	"github.com/Alp4ka/mlogger"
 	"github.com/Alp4ka/mlogger/field"
+	mapset "github.com/deckarep/golang-set/v2"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
-	"github.com/hashicorp/go-set/v2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 	"net"
@@ -17,10 +17,10 @@ import (
 type Server struct {
 	api.UnimplementedGWManagerServiceServer
 
-	contextService contextcomponent.Service
+	contextService context.Service
 	grpcServer     *grpc.Server
 
-	ridStorage *set.Set[string]
+	ridStorage mapset.Set[string]
 
 	port int
 }
@@ -29,7 +29,7 @@ func New(cfg Config) *Server {
 	return &Server{
 		contextService: cfg.ContextService,
 		port:           cfg.Port,
-		ridStorage:     set.New[string](1),
+		ridStorage:     mapset.NewSet[string](),
 	}
 }
 
@@ -58,10 +58,10 @@ func (s *Server) Close() error {
 	return nil
 }
 
-func (s *Server) IsDuplicate(rid string) bool {
-	return s.ridStorage.Contains(rid)
+func (s *Server) IsDuplicate(req *api.ProcessRequest) bool {
+	return s.ridStorage.Contains(req.GetRequestId())
 }
 
-func (s *Server) StoreRequest(rid string) {
-	s.ridStorage.Insert(rid)
+func (s *Server) StoreRequest(req *api.ProcessRequest) {
+	s.ridStorage.Add(req.GetRequestId())
 }

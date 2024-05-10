@@ -8,6 +8,7 @@ require (
 	github.com/Alp4ka/mlogger v1.0.14
 	github.com/ansrivas/fiberprometheus/v2 v2.6.1
 	github.com/caarlos0/env v3.5.0+incompatible
+	github.com/deckarep/golang-set/v2 v2.6.0
 	github.com/doug-martin/goqu/v9 v9.19.0
 	github.com/gofiber/contrib/swagger v1.1.1
 	github.com/gofiber/fiber/v2 v2.52.2
@@ -18,6 +19,7 @@ require (
 	github.com/j2gg0s/otsql v0.18.0
 	github.com/jackc/pgx/v5 v5.5.5
 	github.com/jmoiron/sqlx v1.3.5
+	github.com/prometheus/client_golang v1.16.0
 	github.com/stretchr/testify v1.9.0
 	google.golang.org/grpc v1.62.1
 )
@@ -58,7 +60,6 @@ require (
 	github.com/philhofer/fwd v1.1.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/prometheus/client_golang v1.16.0 // indirect
 	github.com/prometheus/client_model v0.4.0 // indirect
 	github.com/prometheus/common v0.44.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect

@@ -3,8 +3,8 @@ package grpc
 import (
 	"context"
 	"fmt"
-	"github.com/Alp4ka/classifier-aaS/internal/contextcomponent"
-	"github.com/Alp4ka/classifier-aaS/internal/processor"
+	contextcomponent "github.com/Alp4ka/classifier-aaS/internal/components/context"
+	processorcomponent "github.com/Alp4ka/classifier-aaS/internal/components/processor"
 	"github.com/Alp4ka/classifier-aaS/internal/telemetry"
 	timepkg "github.com/Alp4ka/classifier-aaS/pkg/time"
 	api "github.com/Alp4ka/classifier-api"
@@ -46,7 +46,7 @@ func (s *Server) Process(src api.GWManagerService_ProcessServer) (err error) {
 	if err != nil {
 		return fmt.Errorf("failed to get session: %w", err)
 	}
-	proc, err := processor.NewProcessor(session.Tree)
+	proc, err := processorcomponent.NewProcessor(session.Tree)
 	if err != nil {
 		return fmt.Errorf("failed to create processor: %w", err)
 	}
@@ -61,7 +61,7 @@ func (s *Server) Process(src api.GWManagerService_ProcessServer) (err error) {
 func (s *Server) process(
 	ctx context.Context,
 	sess *contextcomponent.Session,
-	proc *processor.Processor,
+	proc *processorcomponent.Processor,
 	src api.GWManagerService_ProcessServer,
 	initReq *api.ProcessRequest,
 ) error {
@@ -101,11 +101,11 @@ func (s *Server) process(
 			field.String("data", req.GetRequestData()),
 		)
 		// Deduplication.
-		if s.IsDuplicate(req.GetRequestId()) {
+		if s.IsDuplicate(req) {
 			mlogger.L(ctx).Info("Duplicate request")
 			continue // TODO: mb not continue or return error.
 		}
-		s.StoreRequest(req.GetRequestId())
+		s.StoreRequest(req)
 
 		// Session.
 		if !sess.Operable() {
@@ -114,7 +114,7 @@ func (s *Server) process(
 
 		// Handle. TODO: pizdec
 	handle:
-		resp, err := proc.Handle(ctx, &processor.Request{Data: req.GetRequestData()})
+		resp, err := proc.Handle(ctx, &processorcomponent.nodeRequest{Data: req.GetRequestData()})
 		if err != nil {
 			return fmt.Errorf("%s: failed to handle client request: %w", fn, err)
 		}

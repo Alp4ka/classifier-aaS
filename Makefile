@@ -17,3 +17,10 @@ migrate:
 .PHONY: down-all
 down-all:
 	sql-migrate down -limit 100 -env="local"
+
+
+.PHONY: doc
+doc:
+	swag init -q -g ./internal/api/*.go -o ./cmd/app/docs/swagger.yaml
+	widdershins swagger.yaml -o openapi.md
+
