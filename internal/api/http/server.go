@@ -2,7 +2,8 @@ package http
 
 import (
 	"fmt"
-	"github.com/Alp4ka/classifier-aaS/internal/schemacomponent"
+	schemacomponent "github.com/Alp4ka/classifier-aaS/internal/components/schema"
+	schemarepository "github.com/Alp4ka/classifier-aaS/internal/components/schema/repository"
 	globaltelemtry "github.com/Alp4ka/classifier-aaS/internal/telemetry"
 	"github.com/Alp4ka/mlogger"
 	"github.com/Alp4ka/mlogger/field"
@@ -23,9 +24,13 @@ type Server struct {
 
 func NewHTTPServer(cfg Config) *Server {
 	server := &Server{
-		schemaService: cfg.SchemaService,
-		port:          cfg.Port,
-		rateLimit:     cfg.RateLimit,
+		schemaService: schemacomponent.NewService(
+			schemacomponent.Config{
+				Repository: schemarepository.NewRepository(cfg.DB),
+			},
+		),
+		port:      cfg.Port,
+		rateLimit: cfg.RateLimit,
 	}
 	server.app = fiber.New(
 		fiber.Config{

@@ -5,10 +5,6 @@ import (
 	"errors"
 	"github.com/Alp4ka/classifier-aaS/internal/api/grpc"
 	"github.com/Alp4ka/classifier-aaS/internal/api/http"
-	contextcomponent "github.com/Alp4ka/classifier-aaS/internal/components/context"
-	contextrepository "github.com/Alp4ka/classifier-aaS/internal/components/context/repository"
-	schemacomponent "github.com/Alp4ka/classifier-aaS/internal/components/schema"
-	schemarepository "github.com/Alp4ka/classifier-aaS/internal/components/schema/repository"
 )
 
 type App struct {
@@ -19,32 +15,20 @@ type App struct {
 }
 
 func New(cfg Config) *App {
-	schemaService := schemacomponent.NewService(
-		schemacomponent.Config{
-			Repository: schemarepository.NewRepository(cfg.DB),
-		},
-	)
-
-	contextService := contextcomponent.NewService(
-		contextcomponent.Config{
-			SchemaService: schemaService,
-			Repository:    contextrepository.NewRepository(cfg.DB),
-		},
-	)
-
 	return &App{
 		cfg: cfg,
 		httpServer: http.NewHTTPServer(
 			http.Config{
-				RateLimit:     cfg.HTTPRateLimit,
-				Port:          cfg.HTTPPort,
-				SchemaService: schemaService,
+				RateLimit: cfg.HTTPRateLimit,
+				Port:      cfg.HTTPPort,
+				DB:        cfg.DB,
 			},
 		).WithMetrics(),
 		grpcServer: grpc.New(
 			grpc.Config{
-				ContextService: contextService,
-				Port:           cfg.GRPCPort,
+				Port:             cfg.GRPCPort,
+				ClassifierAPIKey: cfg.OpenAIAPIKey,
+				DB:               cfg.DB,
 			},
 		),
 	}

@@ -2,8 +2,8 @@ package http
 
 import (
 	"errors"
-	"github.com/Alp4ka/classifier-aaS/internal/schemacomponent"
-	"github.com/Alp4ka/classifier-aaS/internal/schemacomponent/entities"
+	schemacomponent "github.com/Alp4ka/classifier-aaS/internal/components/schema"
+	"github.com/Alp4ka/classifier-aaS/internal/components/schema/entities"
 	"github.com/Alp4ka/mlogger"
 	"github.com/Alp4ka/mlogger/field"
 	"github.com/gofiber/fiber/v2"

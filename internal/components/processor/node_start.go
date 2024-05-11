@@ -13,10 +13,9 @@ func newNodeStart(n *entities.NodeStart) node {
 	return &nodeStart{NodeStart: n}
 }
 
-func (n *nodeStart) Process(ctx context.Context, scope scope, req *nodeRequest) (*nodeResponse, error) {
+func (n *nodeStart) Process(_ context.Context, _ *nodeRequest) (*nodeResponse, error) {
 	return &nodeResponse{
 		Err:          nil,
-		FutureAction: actionFall,
-		UserOutput:   nil,
+		FutureAction: nodeActionFall,
 	}, nil
 }

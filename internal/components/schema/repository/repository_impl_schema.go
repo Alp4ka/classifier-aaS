@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/Alp4ka/classifier-aaS/internal/storage"
-	sqlpkg "github.com/Alp4ka/classifier-aaS/pkg/sql"
 	timepkg "github.com/Alp4ka/classifier-aaS/pkg/time"
 	"github.com/doug-martin/goqu/v9"
 	"github.com/google/uuid"
@@ -22,7 +21,7 @@ func (f *GetSchemaFilter) toDataset() *goqu.SelectDataset {
 	query := goqu.From(tbl_Schema)
 
 	if f == nil {
-		return query.Where(sqlpkg.UnrealCondition)
+		return query.Where(storage.UnrealCondition)
 	}
 
 	if f.ID.Valid {
@@ -36,7 +35,7 @@ func (f *GetSchemaFilter) toDataset() *goqu.SelectDataset {
 	return query
 }
 
-func (r *repositoryImpl) GetSchema(ctx context.Context, dbtx sqlpkg.DBTx, filter *GetSchemaFilter) (*Schema, error) {
+func (r *repositoryImpl) GetSchema(ctx context.Context, filter *GetSchemaFilter) (*Schema, error) {
 	const fn = "repositoryImpl.GetSchema"
 
 	query, _, err := filter.toDataset().ToSQL()
@@ -45,7 +44,8 @@ func (r *repositoryImpl) GetSchema(ctx context.Context, dbtx sqlpkg.DBTx, filter
 	}
 
 	var ret Schema
-	err = dbtx.GetContext(ctx, &ret, query)
+	executor, _ := r.DBTx(ctx)
+	err = executor.GetContext(ctx, &ret, query)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, errors.Join(storage.ErrEntityNotFound, err)
@@ -56,7 +56,7 @@ func (r *repositoryImpl) GetSchema(ctx context.Context, dbtx sqlpkg.DBTx, filter
 	return &ret, nil
 }
 
-func (r *repositoryImpl) CreateSchema(ctx context.Context, dbtx sqlpkg.DBTx, schema Schema) (*Schema, error) {
+func (r *repositoryImpl) CreateSchema(ctx context.Context, schema Schema) (*Schema, error) {
 	const fn = "repositoryImpl.CreateSchema"
 
 	timeNow := timepkg.Now()
@@ -69,7 +69,8 @@ func (r *repositoryImpl) CreateSchema(ctx context.Context, dbtx sqlpkg.DBTx, sch
 	}
 
 	var ret Schema
-	err = dbtx.GetContext(ctx, &ret, query)
+	executor, _ := r.DBTx(ctx)
+	err = executor.GetContext(ctx, &ret, query)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", fn, err)
 	}
@@ -77,7 +78,7 @@ func (r *repositoryImpl) CreateSchema(ctx context.Context, dbtx sqlpkg.DBTx, sch
 	return &ret, nil
 }
 
-func (r *repositoryImpl) UpdateSchema(ctx context.Context, tx sqlpkg.Tx, schema Schema) (*Schema, error) {
+func (r *repositoryImpl) UpdateSchema(ctx context.Context, schema Schema) (*Schema, error) {
 	const fn = "repositoryImpl.UpdateSchema"
 
 	timeNow := timepkg.Now()
@@ -89,7 +90,8 @@ func (r *repositoryImpl) UpdateSchema(ctx context.Context, tx sqlpkg.Tx, schema 
 	}
 
 	var ret Schema
-	err = tx.GetContext(ctx, &ret, query)
+	executor, _ := r.DBTx(ctx)
+	err = executor.GetContext(ctx, &ret, query)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, storage.ErrEntityNotFound

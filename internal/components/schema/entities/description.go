@@ -57,7 +57,7 @@ func (d *Description) Scan(value interface{}) error {
 	return d.UnmarshalJSON(valueBytes)
 }
 
-func (d *Description) Value() (driver.Value, error) {
+func (d Description) Value() (driver.Value, error) {
 	return d.MarshalJSON()
 }
 

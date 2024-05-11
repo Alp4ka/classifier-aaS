@@ -463,7 +463,10 @@ func TestDescription_MapAndValidate(t *testing.T) {
     "id": "25d77b18-a7ce-48d8-8cfa-9f5a3674d15d",
     "type": "listen",
     "nextID": "77c7f51f-b22f-46c9-8db0-9961be07be8c",
-    "nextErrorID": null
+    "nextErrorID": null,
+    "data": {
+        "outputVariable": "my_output"
+    }
   },
   {
     "id": "6ec27a64-4cb5-41d2-82ec-e058f78d6be2",

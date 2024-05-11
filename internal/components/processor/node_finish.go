@@ -13,10 +13,9 @@ func newNodeFinish(n *entities.NodeFinish) node {
 	return &nodeFinish{NodeFinish: n}
 }
 
-func (n *nodeFinish) Process(ctx context.Context, scope scope, req *nodeRequest) (*nodeResponse, error) {
+func (n *nodeFinish) Process(_ context.Context, _ *nodeRequest) (*nodeResponse, error) {
 	return &nodeResponse{
 		Err:          nil,
-		FutureAction: actionFinish,
-		UserOutput:   nil,
+		FutureAction: nodeActionFinish,
 	}, nil
 }

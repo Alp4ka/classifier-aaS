@@ -16,7 +16,7 @@ func newNodeExternalRequest(n *entities.NodeExternalRequest) node {
 	return &nodeExternalRequest{NodeExternalRequest: n}
 }
 
-func (n *nodeExternalRequest) Process(ctx context.Context, scope scope, req *nodeRequest) (*nodeResponse, error) {
+func (n *nodeExternalRequest) Process(ctx context.Context, _ *nodeRequest) (*nodeResponse, error) {
 	const _defaultTimeout = time.Second * 5
 
 	// TODO: Add variables support.
@@ -38,8 +38,7 @@ func (n *nodeExternalRequest) Process(ctx context.Context, scope scope, req *nod
 	if err != nil {
 		return &nodeResponse{
 				Err:          err,
-				FutureAction: actionError,
-				UserOutput:   nil,
+				FutureAction: nodeActionError,
 			},
 			nil
 	}
@@ -47,8 +46,7 @@ func (n *nodeExternalRequest) Process(ctx context.Context, scope scope, req *nod
 
 	return &nodeResponse{
 			Err:          nil,
-			FutureAction: actionFall,
-			UserOutput:   nil,
+			FutureAction: nodeActionFall,
 		},
 		nil
 }

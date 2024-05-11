@@ -15,13 +15,12 @@ func newNodeClassify(n *entities.NodeClassify) node {
 	return &nodeClassify{NodeClassify: n}
 }
 
-func (n *nodeClassify) Process(ctx context.Context, scope scope, req *nodeRequest) (*nodeResponse, error) {
+func (n *nodeClassify) Process(ctx context.Context, req *nodeRequest) (*nodeResponse, error) {
 	cls, err := openai.NewClassifier(openai.Config{APIKey: req.SystemConfig.ClassifierAPIKey})
 	if err != nil {
 		return &nodeResponse{
 				Err:          err,
-				FutureAction: actionError,
-				UserOutput:   nil,
+				FutureAction: nodeActionError,
 			},
 			nil
 	}
@@ -31,23 +30,21 @@ func (n *nodeClassify) Process(ctx context.Context, scope scope, req *nodeReques
 		classes = append(classes, classifier.ClassStruct{Name: c.Name, Description: c.Description})
 	}
 
-	input := scope[n.InputVariable]
+	input := req.Scope[n.InputVariable]
 	res, err := cls.Classify(ctx, classifier.Params{Classes: classes, Input: input, AdditionalContext: n.Context})
 	if err != nil {
 		return &nodeResponse{
 				Err:          err,
-				FutureAction: actionError,
-				UserOutput:   nil,
+				FutureAction: nodeActionError,
 			},
 			nil
 	}
 
 	best, _ := res.Best()
-	scope[n.OutputVariable] = best.Class().Name
+	req.Scope[n.OutputVariable] = best.Class().Name
 	return &nodeResponse{
 			Err:          nil,
-			FutureAction: actionFall,
-			UserOutput:   nil,
+			FutureAction: nodeActionFall,
 		},
 		nil
 }

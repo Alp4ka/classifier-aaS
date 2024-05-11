@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/Alp4ka/classifier-aaS/internal/storage"
-	sqlpkg "github.com/Alp4ka/classifier-aaS/pkg/sql"
 	timepkg "github.com/Alp4ka/classifier-aaS/pkg/time"
 	"github.com/doug-martin/goqu/v9"
 	"github.com/google/uuid"
@@ -20,7 +19,7 @@ func (f *GetSchemaVariantFilter) toDataset() *goqu.SelectDataset {
 	query := goqu.From(tbl_SchemaVariant)
 
 	if f == nil {
-		return query.Where(sqlpkg.UnrealCondition)
+		return query.Where(storage.UnrealCondition)
 	}
 
 	if f.ID.Valid {
@@ -30,7 +29,7 @@ func (f *GetSchemaVariantFilter) toDataset() *goqu.SelectDataset {
 	return query
 }
 
-func (r *repositoryImpl) GetSchemaVariant(ctx context.Context, dbtx sqlpkg.DBTx, filter *GetSchemaVariantFilter) (*SchemaVariant, error) {
+func (r *repositoryImpl) GetSchemaVariant(ctx context.Context, filter *GetSchemaVariantFilter) (*SchemaVariant, error) {
 	const fn = "repositoryImpl.GetSchemaVariant"
 
 	query, _, err := filter.toDataset().ToSQL()
@@ -39,7 +38,8 @@ func (r *repositoryImpl) GetSchemaVariant(ctx context.Context, dbtx sqlpkg.DBTx,
 	}
 
 	var ret SchemaVariant
-	err = dbtx.GetContext(ctx, &ret, query)
+	executor, _ := r.DBTx(ctx)
+	err = executor.GetContext(ctx, &ret, query)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, errors.Join(storage.ErrEntityNotFound, err)
@@ -50,7 +50,7 @@ func (r *repositoryImpl) GetSchemaVariant(ctx context.Context, dbtx sqlpkg.DBTx,
 	return &ret, nil
 }
 
-func (r *repositoryImpl) CreateSchemaVariant(ctx context.Context, dbtx sqlpkg.DBTx, record SchemaVariant) (*SchemaVariant, error) {
+func (r *repositoryImpl) CreateSchemaVariant(ctx context.Context, record SchemaVariant) (*SchemaVariant, error) {
 	const fn = "repositoryImpl.CreateSchemaVariant"
 
 	timeNow := timepkg.Now()
@@ -63,7 +63,8 @@ func (r *repositoryImpl) CreateSchemaVariant(ctx context.Context, dbtx sqlpkg.DB
 	}
 
 	var ret SchemaVariant
-	err = dbtx.GetContext(ctx, &ret, query)
+	executor, _ := r.DBTx(ctx)
+	err = executor.GetContext(ctx, &ret, query)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", fn, err)
 	}

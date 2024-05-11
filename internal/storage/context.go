@@ -7,7 +7,7 @@ import (
 
 var _txKey struct{}
 
-func TxWithContext(ctx context.Context, tx *sqlx.Tx) context.Context {
+func txWithContext(ctx context.Context, tx *sqlx.Tx) context.Context {
 	return context.WithValue(ctx, _txKey, tx)
 }
 

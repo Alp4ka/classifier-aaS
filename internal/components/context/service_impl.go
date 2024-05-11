@@ -185,6 +185,7 @@ type AcquireSessionParams struct {
 func (s *serviceImpl) AcquireSession(ctx context.Context, params *AcquireSessionParams) (*Session, error) {
 	const fn = "serviceImpl.AcquireSession"
 
+	// TODO: Insecure mb.
 	session, err := s.GetSession(ctx, &GetSessionParams{
 		Gateway: null.StringFrom(params.Gateway),
 		Agent:   null.StringFrom(params.Agent),

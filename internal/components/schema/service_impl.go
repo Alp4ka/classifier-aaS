@@ -7,7 +7,6 @@ import (
 	"github.com/Alp4ka/classifier-aaS/internal/components/schema/entities"
 	"github.com/Alp4ka/classifier-aaS/internal/components/schema/repository"
 	"github.com/Alp4ka/classifier-aaS/internal/storage"
-	sqlpkg "github.com/Alp4ka/classifier-aaS/pkg/sql"
 	"github.com/google/uuid"
 	"github.com/guregu/null/v5"
 )
@@ -34,8 +33,8 @@ type GetSchemaFilter struct {
 func (s *serviceImpl) GetSchema(ctx context.Context, filter *GetSchemaFilter) (*SchemaReq, error) {
 	var ret *SchemaReq
 	err := s.repo.WithTransaction(ctx,
-		func(ctx context.Context, tx sqlpkg.Tx) error {
-			schemaRecord, err := s.repo.GetSchema(ctx, tx,
+		func(ctx context.Context) error {
+			schemaRecord, err := s.repo.GetSchema(ctx,
 				&repository.GetSchemaFilter{
 					ID:     filter.ID,
 					Latest: filter.Latest,
@@ -57,7 +56,7 @@ func (s *serviceImpl) GetSchema(ctx context.Context, filter *GetSchemaFilter) (*
 				return nil
 			}
 
-			schemaVariantRecord, err := s.repo.GetSchemaVariant(ctx, tx,
+			schemaVariantRecord, err := s.repo.GetSchemaVariant(ctx,
 				&repository.GetSchemaVariantFilter{
 					ID: schemaRecord.ActualVariantID,
 				},
@@ -87,15 +86,15 @@ type CreateSchemaParams struct {
 func (s *serviceImpl) CreateSchema(ctx context.Context, params *CreateSchemaParams) (*SchemaReq, error) {
 	var ret *SchemaReq
 	err := s.repo.WithTransaction(ctx,
-		func(ctx context.Context, tx sqlpkg.Tx) error {
-			_, err := s.repo.GetSchema(ctx, tx, &repository.GetSchemaFilter{Latest: null.BoolFrom(true)})
+		func(ctx context.Context) error {
+			_, err := s.repo.GetSchema(ctx, &repository.GetSchemaFilter{Latest: null.BoolFrom(true)})
 			if err != nil && !errors.Is(err, storage.ErrEntityNotFound) {
 				return err
 			} else if err == nil {
 				return ErrOnlySingleSchemaAvailable
 			}
 
-			schemaVariantRecord, err := s.repo.CreateSchemaVariant(ctx, tx,
+			schemaVariantRecord, err := s.repo.CreateSchemaVariant(ctx,
 				repository.SchemaVariant{
 					ID:          uuid.New(),
 					Description: entities.Description{},
@@ -106,7 +105,7 @@ func (s *serviceImpl) CreateSchema(ctx context.Context, params *CreateSchemaPara
 				return err
 			}
 
-			schemaRecord, err := s.repo.CreateSchema(ctx, tx,
+			schemaRecord, err := s.repo.CreateSchema(ctx,
 				repository.Schema{
 					ID:              uuid.New(),
 					ActualVariantID: uuid.NullUUID{UUID: schemaVariantRecord.ID, Valid: true},
@@ -153,8 +152,8 @@ func (s *serviceImpl) UpdateSchema(ctx context.Context, params *UpdateSchemaPara
 	}
 
 	err := s.repo.WithTransaction(ctx,
-		func(ctx context.Context, tx sqlpkg.Tx) error {
-			schemaRecord, err := s.repo.GetSchema(ctx, tx,
+		func(ctx context.Context) error {
+			schemaRecord, err := s.repo.GetSchema(ctx,
 				&repository.GetSchemaFilter{
 					ID: uuid.NullUUID{UUID: params.ID, Valid: true},
 				},
@@ -173,7 +172,7 @@ func (s *serviceImpl) UpdateSchema(ctx context.Context, params *UpdateSchemaPara
 			if params.Description != nil {
 				updateSchemaVariantParams.Description = *(params.Description)
 			}
-			schemaVariantRecord, err := s.repo.CreateSchemaVariant(ctx, tx, updateSchemaVariantParams)
+			schemaVariantRecord, err := s.repo.CreateSchemaVariant(ctx, updateSchemaVariantParams)
 			if err != nil {
 				return err
 			}
@@ -182,7 +181,7 @@ func (s *serviceImpl) UpdateSchema(ctx context.Context, params *UpdateSchemaPara
 				ID:              schemaRecord.ID,
 				ActualVariantID: uuid.NullUUID{UUID: schemaVariantRecord.ID, Valid: true},
 			}
-			schemaRecord, err = s.repo.UpdateSchema(ctx, tx, updateSchemaParams)
+			schemaRecord, err = s.repo.UpdateSchema(ctx, updateSchemaParams)
 			if err != nil {
 				return err
 			}
@@ -209,7 +208,7 @@ func (s *serviceImpl) UpdateSchema(ctx context.Context, params *UpdateSchemaPara
 }
 
 func (s *serviceImpl) GetSchemaVariant(ctx context.Context, id uuid.UUID) (*VariantReq, error) {
-	schemaVariantRecord, err := s.repo.GetSchemaVariant(ctx, s.repo.DB(),
+	schemaVariantRecord, err := s.repo.GetSchemaVariant(ctx,
 		&repository.GetSchemaVariantFilter{
 			ID: uuid.NullUUID{UUID: id, Valid: true},
 		},

@@ -37,6 +37,12 @@ github.com/Alp4ka/classifier v1.0.0 h1:5x3LH+i6jsOUFFoQDZqJ4CjoMP1KHKRFgxE069iNq
 github.com/Alp4ka/classifier v1.0.0/go.mod h1:tfJ6lTCzF/CLOELLubeCjfA5edQuRMSL41HOlp2lUZY=
 github.com/Alp4ka/classifier-api v0.0.4 h1:DjyP7NBpbtxVgEl/7CB9VPCcm9IYy9pvFLn5p8mdZes=
 github.com/Alp4ka/classifier-api v0.0.4/go.mod h1:M+vpc9R44b5QKGm+EnmhYQQUIuzA8injM5UZYtWUYPI=
+github.com/Alp4ka/classifier-api v0.0.5 h1:L9E2iDZlMMqdR6064pZ2csXIRbfh4481JDAJgVOrdWs=
+github.com/Alp4ka/classifier-api v0.0.5/go.mod h1:M+vpc9R44b5QKGm+EnmhYQQUIuzA8injM5UZYtWUYPI=
+github.com/Alp4ka/classifier-api v0.0.6 h1:GbAhJkC7aZq4LRIf/NqGE+cD/6ppbjAPhTHLUYc5N60=
+github.com/Alp4ka/classifier-api v0.0.6/go.mod h1:M+vpc9R44b5QKGm+EnmhYQQUIuzA8injM5UZYtWUYPI=
+github.com/Alp4ka/classifier-api v0.0.7 h1:33u6Bz/0maD3QkNljeUL4vD1bxTIuYKuCfAjf+W8uZk=
+github.com/Alp4ka/classifier-api v0.0.7/go.mod h1:M+vpc9R44b5QKGm+EnmhYQQUIuzA8injM5UZYtWUYPI=
 github.com/Alp4ka/mlogger v1.0.14 h1:nlOi97sOLo50VVtkYVkVVAWjuok7oGlqim9QzEsAIvM=
 github.com/Alp4ka/mlogger v1.0.14/go.mod h1:6GanPqOBBlAEAAeyYQIiRJc0uArS9e9dr73Sk5vsiAc=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=

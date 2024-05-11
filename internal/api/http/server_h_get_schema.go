@@ -1,17 +1,8 @@
-//	@Summary		Обновить состояние счета
-//	@Description	Обновить состояние счета  и уведомить клиента.
-//	@Accept			json
-//	@Produce		json
-//	@Success		200			{object}	HandlerResp		"Состояние счета обновлено"
-//	@Failure		400			{object}	HandlerResp		"Ошибка валидации запроса"
-//	@Failure		500			{object}	HandlerResp	"Внутренняя ошибка сервиса"
-//	@Router			/api/schema/{id}  [get]
-
 package http
 
 import (
 	"errors"
-	"github.com/Alp4ka/classifier-aaS/internal/schemacomponent"
+	schemacomponent "github.com/Alp4ka/classifier-aaS/internal/components/schema"
 	"github.com/Alp4ka/mlogger"
 	"github.com/Alp4ka/mlogger/field"
 	"github.com/gofiber/fiber/v2"

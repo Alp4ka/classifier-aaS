@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/Alp4ka/mlogger/field"
 	"github.com/doug-martin/goqu/v9"
 	"github.com/jmoiron/sqlx"
 	"runtime/debug"
@@ -69,7 +70,8 @@ func (s *postgresStorage) WithTransaction(ctx context.Context, function func(con
 		err = errors.Join(err, rollbackErr)
 	}()
 
-	ctx = TxWithContext(ctx, tx)
+	ctx = txWithContext(ctx, tx)
+	ctx = field.WithContextFields(ctx, field.Bool("storage.isTx", true))
 	err = function(ctx)
 	if err != nil {
 		return err

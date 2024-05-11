@@ -1,10 +1,11 @@
 package grpc
 
 import (
-	"github.com/Alp4ka/classifier-aaS/internal/components/context"
+	"github.com/jmoiron/sqlx"
 )
 
 type Config struct {
-	Port           int
-	ContextService context.Service
+	Port             int
+	ClassifierAPIKey string
+	DB               *sqlx.DB
 }

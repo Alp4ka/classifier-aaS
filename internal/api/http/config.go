@@ -1,11 +1,11 @@
 package http
 
 import (
-	"github.com/Alp4ka/classifier-aaS/internal/schemacomponent"
+	"github.com/jmoiron/sqlx"
 )
 
 type Config struct {
-	Port          int
-	SchemaService schemacomponent.Service
-	RateLimit     int
+	Port      int
+	RateLimit int
+	DB        *sqlx.DB
 }

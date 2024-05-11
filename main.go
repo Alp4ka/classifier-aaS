@@ -6,4 +6,4 @@
 
 package classifier_aaS
 
-const AppName = "payment"
+const AppName = "classifier"

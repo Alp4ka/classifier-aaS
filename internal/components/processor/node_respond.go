@@ -15,23 +15,22 @@ func newNodeRespond(n *entities.NodeRespond) node {
 	return &nodeRespond{NodeRespond: n, goForward: false}
 }
 
-func (n *nodeRespond) Process(ctx context.Context, scope scope, req *nodeRequest) (*nodeResponse, error) {
+func (n *nodeRespond) Process(_ context.Context, req *nodeRequest) (*nodeResponse, error) {
 	if !n.goForward {
 		n.goForward = true
 
-		outputText := FormatString(n.Response, scope)
+		outputText := FormatString(n.Response, req.Scope)
 		return &nodeResponse{
 				Err:          nil,
-				FutureAction: actionRespond,
-				UserOutput:   &outputText,
+				FutureAction: nodeActionRespond,
+				UserOutput:   outputText,
 			},
 			nil
 	}
 
 	return &nodeResponse{
 			Err:          nil,
-			FutureAction: actionFall,
-			UserOutput:   nil,
+			FutureAction: nodeActionFall,
 		},
 		nil
 }
