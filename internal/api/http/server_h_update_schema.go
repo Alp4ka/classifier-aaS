@@ -2,6 +2,7 @@ package http
 
 import (
 	"errors"
+
 	schemacomponent "github.com/Alp4ka/classifier-aaS/internal/components/schema"
 	"github.com/Alp4ka/classifier-aaS/internal/components/schema/entities"
 	"github.com/Alp4ka/mlogger"

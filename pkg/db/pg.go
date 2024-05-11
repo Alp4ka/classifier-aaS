@@ -2,6 +2,7 @@ package db
 
 import (
 	"fmt"
+
 	"github.com/j2gg0s/otsql"
 	"github.com/j2gg0s/otsql/hook/metric"
 	"github.com/j2gg0s/otsql/hook/trace"

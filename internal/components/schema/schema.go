@@ -1,9 +1,10 @@
 package schema
 
 import (
+	"time"
+
 	"github.com/Alp4ka/classifier-aaS/internal/components/schema/entities"
 	"github.com/google/uuid"
-	"time"
 )
 
 type VariantReq struct {

@@ -3,6 +3,7 @@ package grpc
 import (
 	"context"
 	"fmt"
+
 	contextcomponent "github.com/Alp4ka/classifier-aaS/internal/components/context"
 	"github.com/Alp4ka/classifier-aaS/internal/telemetry"
 	api "github.com/Alp4ka/classifier-api"

@@ -4,13 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
+
 	contextrepository "github.com/Alp4ka/classifier-aaS/internal/components/context/repository"
 	schemacomponent "github.com/Alp4ka/classifier-aaS/internal/components/schema"
 	"github.com/Alp4ka/classifier-aaS/internal/storage"
 	timepkg "github.com/Alp4ka/classifier-aaS/pkg/time"
 	"github.com/google/uuid"
 	"github.com/guregu/null/v5"
-	"time"
 )
 
 const DefaultSessionLifetime = time.Minute * 10

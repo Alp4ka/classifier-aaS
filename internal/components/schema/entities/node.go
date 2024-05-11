@@ -2,6 +2,7 @@ package entities
 
 import (
 	"fmt"
+
 	"github.com/google/uuid"
 )
 

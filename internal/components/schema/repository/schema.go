@@ -1,9 +1,10 @@
 package repository
 
 import (
+	"time"
+
 	"github.com/doug-martin/goqu/v9"
 	"github.com/google/uuid"
-	"time"
 )
 
 var tbl_Schema = goqu.T("schema")

@@ -4,10 +4,11 @@ import (
 	"database/sql/driver"
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/doug-martin/goqu/v9"
 	"github.com/google/uuid"
 	"github.com/guregu/null/v5"
-	"time"
 )
 
 var tbl_Session = goqu.T("session")

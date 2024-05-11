@@ -5,14 +5,17 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"runtime/debug"
+
 	"github.com/Alp4ka/mlogger/field"
 	"github.com/doug-martin/goqu/v9"
 	"github.com/jmoiron/sqlx"
-	"runtime/debug"
 )
 
-var ErrTxAlreadyExists = errors.New("context already contains tx")
-var UnrealCondition = goqu.I("1=0")
+var (
+	ErrTxAlreadyExists = errors.New("context already contains tx")
+	UnrealCondition    = goqu.I("1=0")
+)
 
 type postgresStorage struct {
 	db *sqlx.DB

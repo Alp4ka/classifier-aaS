@@ -2,6 +2,8 @@ package grpc
 
 import (
 	"fmt"
+	"net"
+
 	contextcomponent "github.com/Alp4ka/classifier-aaS/internal/components/context"
 	contextrepository "github.com/Alp4ka/classifier-aaS/internal/components/context/repository"
 	schemacomponent "github.com/Alp4ka/classifier-aaS/internal/components/schema"
@@ -14,7 +16,6 @@ import (
 	grpcrecovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
-	"net"
 )
 
 type Server struct {

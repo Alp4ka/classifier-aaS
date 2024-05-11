@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"errors"
+
 	"github.com/Alp4ka/classifier-aaS/internal/api/grpc"
 	"github.com/Alp4ka/classifier-aaS/internal/api/http"
 )

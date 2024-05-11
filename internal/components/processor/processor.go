@@ -2,6 +2,7 @@ package processor
 
 import (
 	"fmt"
+
 	contextcomponent "github.com/Alp4ka/classifier-aaS/internal/components/context"
 	"github.com/Alp4ka/classifier-aaS/internal/components/processor/repository"
 	"github.com/google/uuid"

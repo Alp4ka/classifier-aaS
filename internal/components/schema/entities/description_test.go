@@ -2,8 +2,9 @@ package entities
 
 import (
 	"encoding/json"
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestDescription_UnmarshalJSON(t *testing.T) {

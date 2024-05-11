@@ -1,10 +1,11 @@
 package repository
 
 import (
+	"time"
+
 	"github.com/Alp4ka/classifier-aaS/internal/components/schema/entities"
 	"github.com/doug-martin/goqu/v9"
 	"github.com/google/uuid"
-	"time"
 )
 
 var tbl_SchemaVariant = goqu.T("schema_variant")

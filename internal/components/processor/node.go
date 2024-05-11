@@ -2,6 +2,7 @@ package processor
 
 import (
 	"context"
+
 	"github.com/Alp4ka/classifier-aaS/internal/components/schema/entities"
 )
 
@@ -12,7 +13,6 @@ type (
 )
 
 const (
-	nodeActionNone    nodeAction = "node"
 	nodeActionListen  nodeAction = "listen"
 	nodeActionRespond nodeAction = "respond"
 	nodeActionFinish  nodeAction = "finish"

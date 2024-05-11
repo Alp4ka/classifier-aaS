@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
 	"github.com/Alp4ka/classifier-aaS/internal/components/processor/repository"
 	timepkg "github.com/Alp4ka/classifier-aaS/pkg/time"
 	"github.com/Alp4ka/mlogger"
@@ -13,7 +14,6 @@ import (
 type Action = string
 
 const (
-	ActionNone    Action = "none"
 	ActionListen  Action = "listen"
 	ActionRespond Action = "respond"
 	ActionFinish  Action = "finish"
@@ -32,11 +32,11 @@ func (p *Processor) Process(ctx context.Context, req *Request) (*Response, error
 	const fn = "Processor.Process"
 
 	nodeReq := &nodeRequest{
-		SystemConfig: p.systemConfig,
-		UserInput:    req.UserInput,
-		Scope:        p.scope,
+		UserInput: req.UserInput,
+		Scope:     p.scope,
 	}
 	parsedReq, _ := json.Marshal(nodeReq)
+	nodeReq.SystemConfig = p.systemConfig
 	for {
 		select {
 		case <-ctx.Done():
@@ -53,7 +53,7 @@ func (p *Processor) Process(ctx context.Context, req *Request) (*Response, error
 
 		mlogger.L(ctx).Info("Processing node!", field.JSONEscape("nodeRequest", parsedReq))
 		nodeResp, err := p.currentNode.Process(ctx, nodeReq)
-		if err != nil { // Critical error while processing node.
+		if err != nil {
 			mlogger.L(ctx).Error("Failed to process node!", field.Error(err))
 			return nil, fmt.Errorf("%s: %w", fn, err)
 		}

@@ -2,6 +2,7 @@ package http
 
 import (
 	"fmt"
+
 	schemacomponent "github.com/Alp4ka/classifier-aaS/internal/components/schema"
 	schemarepository "github.com/Alp4ka/classifier-aaS/internal/components/schema/repository"
 	globaltelemtry "github.com/Alp4ka/classifier-aaS/internal/telemetry"

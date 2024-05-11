@@ -3,9 +3,10 @@ package processor
 import (
 	"bytes"
 	"context"
-	"github.com/Alp4ka/classifier-aaS/internal/components/schema/entities"
 	"net/http"
 	"time"
+
+	"github.com/Alp4ka/classifier-aaS/internal/components/schema/entities"
 )
 
 type nodeExternalRequest struct {

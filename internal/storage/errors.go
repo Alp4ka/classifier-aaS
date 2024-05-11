@@ -5,9 +5,7 @@ import (
 	"fmt"
 )
 
-var (
-	ErrEntityNotFound = errors.New("entity not found")
-)
+var ErrEntityNotFound = errors.New("entity not found")
 
 type Error struct {
 	fn  string

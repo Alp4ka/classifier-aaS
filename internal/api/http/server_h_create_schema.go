@@ -2,14 +2,14 @@ package http
 
 import (
 	"errors"
+
 	schemacomponent "github.com/Alp4ka/classifier-aaS/internal/components/schema"
 	"github.com/Alp4ka/mlogger"
 	"github.com/Alp4ka/mlogger/field"
 	"github.com/gofiber/fiber/v2"
 )
 
-type hCreateSchemaReq struct {
-}
+type hCreateSchemaReq struct{}
 
 func (s *Server) hCreateSchema(c *fiber.Ctx) error {
 	ctx := c.UserContext()

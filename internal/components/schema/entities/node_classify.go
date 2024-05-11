@@ -86,7 +86,7 @@ func (n *NodeClassifyClasses) FromSliceAny(ms []any) error {
 			return fmt.Errorf("%s: unable to map object", fn)
 		}
 
-		var c = NodeClassifyClass{}
+		c := NodeClassifyClass{}
 		err := c.FromMapAny(converted)
 		if err != nil {
 			return fmt.Errorf("%s: %w", fn, err)

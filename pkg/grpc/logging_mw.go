@@ -2,12 +2,13 @@ package grpc
 
 import (
 	"context"
+	"time"
+
 	"github.com/Alp4ka/mlogger"
 	"github.com/Alp4ka/mlogger/field"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"time"
 )
 
 func ServerStreamInterceptor() grpc.StreamServerInterceptor {

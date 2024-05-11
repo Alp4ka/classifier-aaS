@@ -3,6 +3,8 @@ package grpc
 import (
 	"context"
 	"fmt"
+	"io"
+
 	contextcomponent "github.com/Alp4ka/classifier-aaS/internal/components/context"
 	processorcomponent "github.com/Alp4ka/classifier-aaS/internal/components/processor"
 	"github.com/Alp4ka/classifier-aaS/internal/telemetry"
@@ -13,7 +15,6 @@ import (
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/google/uuid"
 	"github.com/guregu/null/v5"
-	"io"
 )
 
 type ReqStorage struct {
@@ -49,50 +50,55 @@ func (s *Server) Process(src api.GWManagerService_ProcessServer) (err error) {
 		}
 	}()
 
-	var env *environment
-	initReq := true
+	var (
+		initReq                             = true
+		awaitUserAction                     = true
+		req             *api.ProcessRequest = nil
+		env             *environment        = nil
+	)
+
 	for {
-		// Reading request.
-		var req *api.ProcessRequest
-		req, err = src.Recv()
-		if err == io.EOF {
-			return nil
-		} else if err != nil {
-			return fmt.Errorf("failed to receive client request: %w", err)
-		}
-
-		// Prepare environment.
-		if initReq {
-			var sessionID uuid.UUID
-			sessionID, err = getSessionID(ctx)
-			if err != nil {
-				return fmt.Errorf("%s: failed to get session id: %w", fn, err)
+		if awaitUserAction {
+			// Reading request.
+			req, err = src.Recv()
+			if err == io.EOF {
+				return nil
+			} else if err != nil {
+				return fmt.Errorf("failed to receive client request: %w", err)
 			}
 
-			env, err = s.prepareEnvironment(ctx, sessionID)
+			// Prepare environment.
+			if initReq {
+				var sessionID uuid.UUID
+				sessionID, err = getSessionID(ctx)
+				if err != nil {
+					return fmt.Errorf("%s: failed to get session id: %w", fn, err)
+				}
+
+				env, err = s.prepareEnvironment(ctx, sessionID)
+				if err != nil {
+					return fmt.Errorf("%s: failed to prepare environment: %w", fn, err)
+				}
+
+				// Metrics.
+				timeStart := timepkg.Now()
+				defer func() {
+					telemetry.T().ObserveProcessDuration(env.Session.Model.Gateway, timepkg.Now().Sub(timeStart))
+				}()
+
+				initReq = false
+			}
+			err = env.ReqStorage.StoreRequest(req)
 			if err != nil {
-				return fmt.Errorf("%s: failed to prepare environment: %w", fn, err)
+				return fmt.Errorf("%s: failed store request: %w", fn, err)
 			}
 
-			// Metrics.
-			timeStart := timepkg.Now()
-			defer func() {
-				telemetry.T().ObserveProcessDuration(env.Session.Model.Gateway, timepkg.Now().Sub(timeStart))
-			}()
-
-			initReq = false
-		}
-		err = env.ReqStorage.StoreRequest(req)
-		if err != nil {
-			return fmt.Errorf("%s: failed store request: %w", fn, err)
+			// Processing.
+			if !env.Session.Operable() {
+				return fmt.Errorf("session expired")
+			}
 		}
 
-		// Processing.
-		if !env.Session.Operable() {
-			return fmt.Errorf("session expired")
-		}
-
-		// TODO Await action flag.
 		var resp *processorcomponent.Response
 		resp, err = env.Processor.Process(ctx, &processorcomponent.Request{UserInput: req.GetRequestData()})
 		if err != nil {
@@ -110,6 +116,9 @@ func (s *Server) Process(src api.GWManagerService_ProcessServer) (err error) {
 				Action:       protoAction,
 			},
 		)
+
+		// Interactions.
+		awaitUserAction = resp.Action != processorcomponent.ActionRespond
 	}
 }
 

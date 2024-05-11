@@ -2,6 +2,7 @@ package processor
 
 import (
 	"context"
+
 	"github.com/Alp4ka/classifier"
 	"github.com/Alp4ka/classifier-aaS/internal/components/schema/entities"
 	"github.com/Alp4ka/classifier/openai"

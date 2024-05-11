@@ -2,6 +2,7 @@ package processor
 
 import (
 	"fmt"
+
 	"github.com/Alp4ka/classifier-aaS/internal/components/schema/entities"
 )
 

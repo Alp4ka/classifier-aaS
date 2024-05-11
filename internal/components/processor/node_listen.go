@@ -2,6 +2,7 @@ package processor
 
 import (
 	"context"
+
 	"github.com/Alp4ka/classifier-aaS/internal/components/schema/entities"
 )
 
@@ -28,7 +29,7 @@ func (n *nodeListen) Process(_ context.Context, req *nodeRequest) (*nodeResponse
 
 	return &nodeResponse{
 			Err:          nil,
-			FutureAction: nodeActionNone,
+			FutureAction: nodeActionFall,
 		},
 		nil
 }

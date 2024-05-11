@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"log"
+
 	classifieraas "github.com/Alp4ka/classifier-aaS"
 	"github.com/Alp4ka/classifier-aaS/internal/app"
 	"github.com/Alp4ka/classifier-aaS/internal/config"
@@ -10,7 +12,6 @@ import (
 	"github.com/Alp4ka/mlogger/field"
 	"github.com/Alp4ka/mlogger/misc"
 	"github.com/jmoiron/sqlx"
-	"log"
 )
 
 type environment struct {

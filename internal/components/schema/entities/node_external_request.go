@@ -3,6 +3,7 @@ package entities
 import (
 	"encoding/json"
 	"fmt"
+
 	mapset "github.com/deckarep/golang-set/v2"
 )
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/Alp4ka/classifier-aaS/internal/components/schema/entities"
 	"github.com/Alp4ka/classifier-aaS/internal/components/schema/repository"
 	"github.com/Alp4ka/classifier-aaS/internal/storage"
@@ -80,8 +81,7 @@ func (s *serviceImpl) GetSchema(ctx context.Context, filter *GetSchemaFilter) (*
 	return ret, nil
 }
 
-type CreateSchemaParams struct {
-}
+type CreateSchemaParams struct{}
 
 func (s *serviceImpl) CreateSchema(ctx context.Context, params *CreateSchemaParams) (*SchemaReq, error) {
 	var ret *SchemaReq

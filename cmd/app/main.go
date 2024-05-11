@@ -2,13 +2,14 @@ package main
 
 import (
 	"context"
-	"github.com/Alp4ka/mlogger"
-	"github.com/Alp4ka/mlogger/field"
-	_ "github.com/jackc/pgx/v5/stdlib"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/Alp4ka/mlogger"
+	"github.com/Alp4ka/mlogger/field"
+	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 const (
