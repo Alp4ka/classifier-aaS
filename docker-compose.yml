@@ -5,8 +5,8 @@ services:
     build: .
     restart: always
     ports:
-      - "227:1111"
-      - "229:1113"
+      - "228:8000"
+      - "229:9000"
     networks:
       - classifier-aas-net
     depends_on:
@@ -15,7 +15,7 @@ services:
     image: postgres:16
     restart: always
     ports:
-      - "228:5432"
+      - "220:5432"
     volumes:
       - classifier-aas-postgres-data:/var/lib/postgresql/data
       - ./scripts/db/extensions.sql:/docker-entrypoint-initdb.d/extensions.sql:ro
