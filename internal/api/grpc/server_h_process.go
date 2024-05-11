@@ -4,11 +4,13 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"sync"
+
+	"github.com/Alp4ka/classifier-aaS/internal/telemetry"
+	timepkg "github.com/Alp4ka/classifier-aaS/pkg/time"
 
 	contextcomponent "github.com/Alp4ka/classifier-aaS/internal/components/context"
 	processorcomponent "github.com/Alp4ka/classifier-aaS/internal/components/processor"
-	"github.com/Alp4ka/classifier-aaS/internal/telemetry"
-	timepkg "github.com/Alp4ka/classifier-aaS/pkg/time"
 	api "github.com/Alp4ka/classifier-api"
 	"github.com/Alp4ka/mlogger"
 	"github.com/Alp4ka/mlogger/field"
@@ -51,12 +53,21 @@ func (s *Server) Process(src api.GWManagerService_ProcessServer) (err error) {
 	}()
 
 	var (
-		initReq                             = true
+		once                                = sync.Once{}
 		awaitUserAction                     = true
 		req             *api.ProcessRequest = nil
 		env             *environment        = nil
 	)
 
+	// Metrics.
+	{
+		timeStart := timepkg.Now()
+		defer func() {
+			if env.Session != nil {
+				telemetry.T().ObserveProcessDuration(env.Session.Model.Gateway, timepkg.Now().Sub(timeStart))
+			}
+		}()
+	}
 	for {
 		if awaitUserAction {
 			// Reading request.
@@ -68,26 +79,20 @@ func (s *Server) Process(src api.GWManagerService_ProcessServer) (err error) {
 			}
 
 			// Prepare environment.
-			if initReq {
-				var sessionID uuid.UUID
-				sessionID, err = getSessionID(ctx)
-				if err != nil {
-					return fmt.Errorf("%s: failed to get session id: %w", fn, err)
-				}
+			once.Do(
+				func() {
+					var sessionID uuid.UUID
+					sessionID, err = getSessionID(ctx)
+					if err != nil {
+						err = fmt.Errorf("%s: failed to get session id: %w", fn, err)
+					}
 
-				env, err = s.prepareEnvironment(ctx, sessionID)
-				if err != nil {
-					return fmt.Errorf("%s: failed to prepare environment: %w", fn, err)
-				}
-
-				// Metrics.
-				timeStart := timepkg.Now()
-				defer func() {
-					telemetry.T().ObserveProcessDuration(env.Session.Model.Gateway, timepkg.Now().Sub(timeStart))
-				}()
-
-				initReq = false
-			}
+					env, err = s.prepareEnvironment(ctx, sessionID)
+					if err != nil {
+						err = fmt.Errorf("%s: failed to prepare environment: %w", fn, err)
+					}
+				},
+			)
 			err = env.ReqStorage.StoreRequest(req)
 			if err != nil {
 				return fmt.Errorf("%s: failed store request: %w", fn, err)
