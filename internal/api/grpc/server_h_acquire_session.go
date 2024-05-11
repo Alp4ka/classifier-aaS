@@ -10,14 +10,16 @@ import (
 )
 
 func (s *Server) AcquireSession(ctx context.Context, req *api.AcquireSessionRequest) (*api.AcquireSessionResponse, error) {
-	sess, err := s.contextService.AcquireSession(ctx,
-		&contextcomponent.AcquireSessionParams{
+	const fn = "Server.AcquireSession"
+
+	sess, err := s.contextService.CreateSession(ctx,
+		&contextcomponent.CreateSessionParams{
 			Agent:   req.GetAgent(),
 			Gateway: req.GetGateway(),
 		},
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to acquire session: %w", err)
+		return nil, fmt.Errorf("%s: failed to acquire session: %w", fn, err)
 	}
 
 	telemetry.T().IncrementSessionCount(sess.Model.Gateway)

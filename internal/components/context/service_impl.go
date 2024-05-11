@@ -178,38 +178,4 @@ func (s *serviceImpl) CreateSession(ctx context.Context, params *CreateSessionPa
 	return session, nil
 }
 
-type AcquireSessionParams struct {
-	Agent   string
-	Gateway string
-}
-
-func (s *serviceImpl) AcquireSession(ctx context.Context, params *AcquireSessionParams) (*Session, error) {
-	const fn = "serviceImpl.AcquireSession"
-
-	// TODO: Insecure mb.
-	session, err := s.GetSession(ctx, &GetSessionParams{
-		Gateway: null.StringFrom(params.Gateway),
-		Agent:   null.StringFrom(params.Agent),
-		Active:  null.BoolFrom(true),
-	})
-	if err == nil {
-		if session.Operable() {
-			return session, nil
-		}
-	} else if !errors.Is(err, ErrSessionDoesNotExist) {
-		return nil, fmt.Errorf("%s: %w", fn, err)
-	}
-
-	session, err = s.CreateSession(ctx, &CreateSessionParams{
-		SessionID: uuid.New(),
-		Agent:     params.Agent,
-		Gateway:   params.Gateway,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("%s: %w", fn, err)
-	}
-
-	return session, nil
-}
-
 var _ Service = (*serviceImpl)(nil)

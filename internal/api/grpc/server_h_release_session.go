@@ -10,14 +10,16 @@ import (
 )
 
 func (s *Server) ReleaseSession(ctx context.Context, req *api.ReleaseSessionRequest) (*api.ReleaseSessionResponse, error) {
+	const fn = "Server.ReleaseSession"
+
 	sessID, err := uuid.Parse(req.GetSessionId())
 	if err != nil {
-		return nil, fmt.Errorf("unable to parse session uuid: %w", err)
+		return nil, fmt.Errorf("%s: unable to parse session uuid: %w", fn, err)
 	}
 
 	err = s.contextService.ReleaseSession(ctx, sessID, contextrepository.SessionStateClosedGateway)
 	if err != nil {
-		return nil, fmt.Errorf("failed to release session: %w", err)
+		return nil, fmt.Errorf("%s: failed to release session: %w", fn, err)
 	}
 
 	return &api.ReleaseSessionResponse{}, nil
