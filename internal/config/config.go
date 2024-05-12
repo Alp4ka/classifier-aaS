@@ -8,7 +8,7 @@ import (
 
 type Config struct {
 	// Postgres.
-	PgDSN                string `env:"PG_DSN" envDefault:"postgres://db:db@localhost:220/classifier-aas?sslmode=disable"`
+	PgDSN                string `env:"PG_DSN" envDefault:"postgres://db:db@localhost:228/classifier-aas?sslmode=disable"`
 	PgMaxOpenConnections int    `env:"PG_MAX_OPEN_CONNS" envDefault:"50"`
 	PgMaxIdleConnections int    `env:"PG_MAX_IDLE_CONNS" envDefault:"50"`
 

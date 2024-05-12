@@ -74,7 +74,11 @@ func (ss *serverStream) SendMsg(msg interface{}) error {
 
 func (ss *serverStream) RecvMsg(msg interface{}) error {
 	err := ss.ServerStream.RecvMsg(msg)
-	mlogger.L(ss.ctx).Info("RecvMsg", field.Any("request", msg))
+	if err == nil {
+		mlogger.L(ss.ctx).Info("RecvMsg", field.Any("request", msg))
+	} else {
+		mlogger.L(ss.ctx).Warn("RecvMsg", field.Any("request", msg), field.Error(err))
+	}
 
 	return err
 }

@@ -5,17 +5,17 @@ services:
     build: .
     restart: always
     ports:
-      - "228:8000"
+      - "227:8000"
       - "229:9000"
     networks:
-      - classifier-aas-net
+      default: null
     depends_on:
       - pg
   pg:
     image: postgres:16
     restart: always
     ports:
-      - "220:5432"
+      - "228:5432"
     volumes:
       - classifier-aas-postgres-data:/var/lib/postgresql/data
       - ./scripts/db/extensions.sql:/docker-entrypoint-initdb.d/extensions.sql:ro
@@ -24,11 +24,12 @@ services:
       - POSTGRES_PASSWORD=db
       - POSTGRES_DB=classifier-aas
     networks:
-      - classifier-aas-net
+      default: null
 
 volumes:
   classifier-aas-postgres-data: {}
 
 networks:
-  classifier-aas-net:
-    driver: bridge
+  default:
+    external: true
+    name: classifier

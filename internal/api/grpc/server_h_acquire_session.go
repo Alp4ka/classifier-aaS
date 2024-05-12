@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/google/uuid"
+
 	contextcomponent "github.com/Alp4ka/classifier-aaS/internal/components/context"
 	"github.com/Alp4ka/classifier-aaS/internal/telemetry"
 	api "github.com/Alp4ka/classifier-api"
@@ -14,8 +16,9 @@ func (s *Server) AcquireSession(ctx context.Context, req *api.AcquireSessionRequ
 
 	sess, err := s.contextService.CreateSession(ctx,
 		&contextcomponent.CreateSessionParams{
-			Agent:   req.GetAgent(),
-			Gateway: req.GetGateway(),
+			SessionID: uuid.New(),
+			Agent:     req.GetAgent(),
+			Gateway:   req.GetGateway(),
 		},
 	)
 	if err != nil {

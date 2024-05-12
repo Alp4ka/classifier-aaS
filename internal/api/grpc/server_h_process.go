@@ -46,11 +46,6 @@ func (s *Server) Process(src api.GWManagerService_ProcessServer) (err error) {
 	const fn = "Server.Process"
 
 	ctx := src.Context()
-	defer func() {
-		if err != nil {
-			mlogger.L(ctx).Error("Process failed", field.Error(err))
-		}
-	}()
 
 	var (
 		once                                = sync.Once{}
@@ -63,7 +58,7 @@ func (s *Server) Process(src api.GWManagerService_ProcessServer) (err error) {
 	{
 		timeStart := timepkg.Now()
 		defer func() {
-			if env.Session != nil {
+			if env != nil && env.Session != nil {
 				telemetry.T().ObserveProcessDuration(env.Session.Model.Gateway, timepkg.Now().Sub(timeStart))
 			}
 		}()
@@ -93,9 +88,18 @@ func (s *Server) Process(src api.GWManagerService_ProcessServer) (err error) {
 					}
 				},
 			)
+			if err != nil {
+				return err
+			}
+
 			err = env.ReqStorage.StoreRequest(req)
 			if err != nil {
-				return fmt.Errorf("%s: failed store request: %w", fn, err)
+				mlogger.L(ctx).Warn(
+					"Request duplication!",
+					field.String("requestID", req.GetRequestId()),
+					field.Bool("skip", true),
+				)
+				continue
 			}
 
 			// Processing.
