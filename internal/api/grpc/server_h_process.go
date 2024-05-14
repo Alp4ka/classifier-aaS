@@ -80,11 +80,13 @@ func (s *Server) Process(src api.GWManagerService_ProcessServer) (err error) {
 					sessionID, err = getSessionID(ctx)
 					if err != nil {
 						err = fmt.Errorf("%s: failed to get session id: %w", fn, err)
+						return
 					}
 
 					env, err = s.prepareEnvironment(ctx, sessionID)
 					if err != nil {
 						err = fmt.Errorf("%s: failed to prepare environment: %w", fn, err)
+						return
 					}
 				},
 			)
